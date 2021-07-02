@@ -11,11 +11,13 @@ interface TextMessage {
 
 interface ConversationState {
   otherParticipant: string | null;
+  initiate: boolean;
   messages: TextMessage[];
 }
 
 const initialState: ConversationState = {
   otherParticipant: null,
+  initiate: false,
   messages: [],
 };
 
@@ -26,8 +28,14 @@ export const conversationSlice = createSlice({
     addMessage: (state, action: PayloadAction<TextMessage>) => {
       state.messages.push(action.payload);
     },
-    setParticipant: (state, action: PayloadAction<string>) => {
-      state.otherParticipant = action.payload;
+    setParticipant: (
+      state,
+      action: PayloadAction<{ id: string; initiate?: boolean }>,
+    ) => {
+      state.otherParticipant = action.payload.id;
+      if (action.payload.initiate !== undefined) {
+        state.initiate = action.payload.initiate;
+      }
     },
   },
 });

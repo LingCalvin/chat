@@ -32,8 +32,10 @@ export default function Conversation() {
   )?.username;
 
   useEffect(() => {
-    connectToPeer(query.peer as string);
-  }, [connectToPeer, query.peer]);
+    if (conversation.initiate) {
+      connectToPeer(query.peer as string);
+    }
+  }, [connectToPeer, conversation.initiate, query.peer]);
 
   const [messageInput, setMessageInput] = useState('');
 

@@ -78,7 +78,7 @@ export default function useDataChanel() {
       const message: Message = JSON.parse(ev.data);
       // Handle pre-signal event sent by the initiator
       if (isPreSignalMessage(message) && message.data.type === 'initiate') {
-        dispatch(setParticipant(message.data.sender.id));
+        dispatch(setParticipant({ id: message.data.sender.id }));
         dispatch(addContact(message.data.sender));
         preSignal(message.data.sender.id, 'accept');
         // Create a new peer connection
@@ -88,7 +88,7 @@ export default function useDataChanel() {
         isPreSignalMessage(message) &&
         message.data.type === 'accept'
       ) {
-        dispatch(setParticipant(message.data.sender.id));
+        dispatch(setParticipant({ id: message.data.sender.id }));
         dispatch(addContact(message.data.sender));
         // Initiate a new peer connection
         setPeer(new SimplePeer({ initiator: true }));

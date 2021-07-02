@@ -56,7 +56,7 @@ export default function Home() {
       </div>
       <ConnectForm
         onSubmit={({ id }) => {
-          dispatch(setParticipant(id));
+          dispatch(setParticipant({ id, initiate: true }));
           router.push(`/conversations/${id}`);
         }}
       />
