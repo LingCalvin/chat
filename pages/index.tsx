@@ -1,48 +1,72 @@
-import { Container, Typography } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Button, Container, Typography } from '@material-ui/core';
 import { useRouter } from 'next/router';
-import { useContext, useEffect } from 'react';
-import ConnectForm, { Inputs } from '../components/connect-form';
-import PeerConnectionContext from '../contexts/peer-connection.context';
+import Link from 'next/link';
+import ConnectForm from '../components/connect-form';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { setParticipant } from '../features/conversation/conversation-slice';
+import { useEffect } from 'react';
 import useStyles from '../styles/index.styles';
 
 export default function Home() {
   const classes = useStyles();
-  const router = useRouter();
 
-  const {
-    selfId,
-    status: connectionStatus,
-    peerId,
-  } = useContext(PeerConnectionContext);
+  const authState = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const chatPartner = useAppSelector(
+    (state) => state.conversation.otherParticipant,
+  );
 
   useEffect(() => {
-    if (connectionStatus === 'open' && peerId?.length) {
-      router.push(`/conversations/${peerId}`);
+    if (chatPartner !== null) {
+      router.push(`/conversations/${chatPartner}`);
     }
-  }, [connectionStatus, peerId, router]);
+  }, [chatPartner, router]);
 
-  const handleSubmit = ({ id }: Inputs) => {
-    router.push(`/conversations/${id}`);
-  };
-
-  return (
-    <Container className={classes.root}>
-      <Typography variant="h3" component="h1">
-        Enter another person&apos;s ID to begin chatting.
+  const unauthenticatedView = (
+    <div className={`${classes.unauthenticatedView} ${classes.content}`}>
+      <Typography variant="h2" component="h1">
+        Start chatting
       </Typography>
-      <div>
-        <Typography>Your ID is</Typography>
-        <Typography align="center">
-          {selfId === undefined ? (
-            <Skeleton className={classes.idSkeleton} />
-          ) : (
-            selfId
-          )}
+      <div className={classes.buttonBox}>
+        <Link href="/auth/sign-up" passHref>
+          <Button variant="outlined">Sign up</Button>
+        </Link>
+        <Link href="/auth/sign-in" passHref>
+          <Button color="primary" variant="contained">
+            Sign in
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+
+  const authenticatedView = (
+    <>
+      <Typography variant="h2" component="h1">
+        Connect to peer
+      </Typography>
+      <div className={classes.idContainer}>
+        <Typography variant="h5" component="p">
+          Your ID
+        </Typography>
+        <Typography>
+          {authState.status === 'authenticated' ? authState.id : null}
         </Typography>
       </div>
-
-      <ConnectForm onSubmit={handleSubmit} />
+      <ConnectForm
+        onSubmit={({ id }) => {
+          dispatch(setParticipant(id));
+          router.push(`/conversations/${id}`);
+        }}
+      />
+    </>
+  );
+  return (
+    <Container className={classes.root}>
+      {authState.status === 'authenticated'
+        ? authenticatedView
+        : unauthenticatedView}
     </Container>
   );
 }
