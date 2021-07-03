@@ -3,11 +3,13 @@ import {
   Container,
   IconButton,
   InputAdornment,
+  Snackbar,
   TextField,
   Toolbar,
   Typography,
 } from '@material-ui/core';
 import { Send } from '@material-ui/icons';
+import { Alert } from '@material-ui/lab';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import DataChannelContext from '../../contexts/data-channel.context';
@@ -46,9 +48,12 @@ export default function Conversation() {
     setMessageInput(e.target.value);
   };
 
+  const canSendMessage =
+    messageInput.length > 0 && conversation.connectionStatus === 'connected';
+
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    if (messageInput.length > 0) {
+    if (canSendMessage) {
       sendMessage(messageInput);
       setMessageInput('');
     }
@@ -108,7 +113,7 @@ export default function Conversation() {
                   <IconButton
                     aria-label="send"
                     type="submit"
-                    disabled={messageInput.length < 1}
+                    disabled={!canSendMessage}
                   >
                     <Send />
                   </IconButton>
@@ -118,6 +123,14 @@ export default function Conversation() {
           />
         </form>
       </Container>
+      <Snackbar
+        className={classes.snackbar}
+        open={conversation.connectionStatus === 'closed'}
+      >
+        <Alert variant="filled" severity="error">
+          The connection has been closed.
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

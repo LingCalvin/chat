@@ -3,6 +3,7 @@ import SimplePeer from 'simple-peer';
 import { addContact } from '../features/contacts/contacts.slice';
 import {
   addMessage,
+  setConnectionStatus,
   setParticipant,
 } from '../features/conversation/conversation-slice';
 import { useAppDispatch, useAppSelector } from '../hooks';
@@ -27,6 +28,11 @@ export default function useDataChanel() {
   const [socket, setSocket] = useState<WebSocket>();
   const [peer, setPeer] = useState<SimplePeer.Instance>();
 
+  // Cleanup and close the connection
+  useEffect(() => {
+    return () => peer?.destroy();
+  }, [peer]);
+
   const socketUrl =
     accessToken !== null
       ? `${process.env.NEXT_PUBLIC_SIGNALING_SERVER}?access_token=${accessToken}`
@@ -50,12 +56,19 @@ export default function useDataChanel() {
   // Send a pre-signal event to the peer
   const preSignal = useCallback(
     (id: string, type: 'initiate' | 'accept') => {
-      socket?.send(
-        JSON.stringify({
-          event: 'pre-signal',
-          data: { type, recipientId: id },
-        }),
-      );
+      const sendPreSignal = () =>
+        socket?.send(
+          JSON.stringify({
+            event: 'pre-signal',
+            data: { type, recipientId: id },
+          }),
+        ) ?? (() => {});
+      // Send the pre-signal message once the socket is open
+      if (socket?.readyState === WebSocket.OPEN) {
+        sendPreSignal();
+      } else {
+        socket?.addEventListener('open', sendPreSignal, { once: true });
+      }
     },
     [socket],
   );
@@ -154,16 +167,27 @@ export default function useDataChanel() {
         }),
       );
     };
+    const handleConnect = () => {
+      dispatch(setConnectionStatus('connected'));
+    };
     const handleClose = () => {
-      console.warn('peer closed.');
+      dispatch(setConnectionStatus('closed'));
+    };
+    const handleError = (e: Error) => {
+      console.error(e);
+      dispatch(setConnectionStatus('closed'));
     };
     peer?.on('signal', handleSignal);
     peer?.on('data', handleData);
+    peer?.on('connect', handleConnect);
     peer?.on('close', handleClose);
+    peer?.on('error', handleError);
     return () => {
       peer?.off('signal', handleSignal);
       peer?.off('data', handleData);
+      peer?.off('connect', handleConnect);
       peer?.off('close', handleClose);
+      peer?.off('error', handleError);
     };
   }, [conversation.otherParticipant, dispatch, id, peer, sendMessage, signal]);
 

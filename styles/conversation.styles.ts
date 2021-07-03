@@ -59,6 +59,10 @@ const useStyles = makeStyles((theme) => {
       color: theme.palette.primary.contrastText,
       marginLeft: 'auto',
     },
+    snackbar: {
+      position: 'absolute',
+      bottom: '80px',
+    },
   };
 });
 

@@ -10,12 +10,14 @@ interface TextMessage {
 }
 
 interface ConversationState {
+  connectionStatus: 'initial' | 'connected' | 'closed';
   otherParticipant: string | null;
   initiate: boolean;
   messages: TextMessage[];
 }
 
 const initialState: ConversationState = {
+  connectionStatus: 'initial',
   otherParticipant: null,
   initiate: false,
   messages: [],
@@ -37,9 +39,16 @@ export const conversationSlice = createSlice({
         state.initiate = action.payload.initiate;
       }
     },
+    setConnectionStatus: (
+      state,
+      action: PayloadAction<ConversationState['connectionStatus']>,
+    ) => {
+      state.connectionStatus = action.payload;
+    },
   },
 });
 
-export const { addMessage, setParticipant } = conversationSlice.actions;
+export const { addMessage, setParticipant, setConnectionStatus } =
+  conversationSlice.actions;
 const conversationReducer = conversationSlice.reducer;
 export default conversationReducer;
