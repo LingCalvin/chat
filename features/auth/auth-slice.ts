@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserInfo } from '../../interfaces/user-info';
+import { UserInfo } from './interfaces/user-info';
 
 interface InitialAuthState {
   status: 'unauthenticated';

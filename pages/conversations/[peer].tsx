@@ -11,9 +11,9 @@ import { Send } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
-import TextField from '../../components/text-field';
-import DataChannelContext from '../../contexts/data-channel.context';
-import { useAppSelector } from '../../hooks';
+import { useAppSelector } from '../../app/hooks';
+import TextField from '../../common/components/text-field';
+import DataChannelContext from '../../features/data-channel/contexts/data-channel.context';
 import useStyles from '../../styles/conversation.styles';
 
 export type Inputs = {

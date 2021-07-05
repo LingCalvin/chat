@@ -1,11 +1,11 @@
-import { Button, Container, Snackbar, Typography } from '@material-ui/core';
+import { Button, Container, Typography } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { SerializedError } from '@reduxjs/toolkit';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query/react';
 import Link from 'next/link';
-import SignUpForm from '../../components/sign-up-form';
-import isFetchBaseQueryError from '../../lib/type-guards/is-fetch-base-query-error';
-import { useSignUpMutation } from '../../services/auth';
+import { useSignUpMutation } from '../../app/services/auth';
+import isFetchBaseQueryError from '../../common/type-guards/is-fetch-base-query-error';
+import SignUpForm from '../../features/auth/components/sign-up-form';
 import useStyles from '../../styles/auth.styles';
 
 function errorMessage(

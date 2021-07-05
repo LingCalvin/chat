@@ -3,12 +3,12 @@ import { Alert } from '@material-ui/lab';
 import { SerializedError } from '@reduxjs/toolkit';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query/react';
 import { useRouter } from 'next/router';
-import SignInForm from '../../components/sign-in-form';
+import { useAppDispatch } from '../../app/hooks';
+import { useSignInMutation } from '../../app/services/auth';
+import isFetchBaseQueryError from '../../common/type-guards/is-fetch-base-query-error';
 import { setAuthentication } from '../../features/auth/auth-slice';
-import { useAppDispatch } from '../../hooks';
-import { Credentials } from '../../interfaces/credentials';
-import isFetchBaseQueryError from '../../lib/type-guards/is-fetch-base-query-error';
-import { useSignInMutation } from '../../services/auth';
+import SignInForm from '../../features/auth/components/sign-in-form';
+import { Credentials } from '../../features/auth/interfaces/credentials';
 import useStyles from '../../styles/auth.styles';
 
 function errorMessage(

@@ -1,10 +1,10 @@
 import { Button, Container, Typography } from '@material-ui/core';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
-import ConnectForm from '../components/connect-form';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { setParticipant } from '../features/conversation/conversation-slice';
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import ConnectForm from '../features/conversation/components/connect-form';
+import { setParticipant } from '../features/conversation/conversation-slice';
 import useStyles from '../styles/index.styles';
 
 export default function Home() {

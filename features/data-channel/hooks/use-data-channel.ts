@@ -1,17 +1,17 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import SimplePeer from 'simple-peer';
-import { addContact } from '../features/contacts/contacts.slice';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { addContact } from '../../contacts/contacts.slice';
 import {
   addMessage,
   setConnectionStatus,
   setParticipant,
-} from '../features/conversation/conversation-slice';
-import { useAppDispatch, useAppSelector } from '../hooks';
+} from '../../conversation/conversation-slice';
 import {
   isPreSignalMessage,
   isSignalMessage,
   Message,
-} from '../lib/messages/message';
+} from '../interfaces/message';
 
 export interface SocketProviderProps {
   children?: ReactNode;

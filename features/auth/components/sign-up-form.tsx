@@ -1,10 +1,9 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, ButtonProps, TextFieldProps } from '@material-ui/core';
-import { useForm } from 'react-hook-form';
-import { SubmitHandler } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import useStyles from './form.styles';
-import TextField from './text-field';
+import TextField from '../../../common/components/text-field';
+import useStyles from '../../../common/styles/form.styles';
 
 export type Inputs = {
   username: string;

@@ -1,5 +1,5 @@
 import { SignalData } from 'simple-peer';
-import { UserInfo } from '../interfaces/user-info';
+import { UserInfo } from '../../auth/interfaces/user-info';
 
 export interface SignalMessage {
   event: 'signal';
