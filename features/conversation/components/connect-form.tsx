@@ -1,5 +1,6 @@
-import { Button, InputAdornment, TextField } from '@material-ui/core';
+import { Button, InputAdornment } from '@material-ui/core';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import TextField from '../../../common/components/text-field';
 
 export type Inputs = {
   id: string;

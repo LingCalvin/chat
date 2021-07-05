@@ -1,4 +1,5 @@
 import { makeStyles } from '@material-ui/core';
+import { indigo } from '@material-ui/core/colors';
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
 
 const useStyles = makeStyles((theme) => {
@@ -19,20 +20,33 @@ const useStyles = makeStyles((theme) => {
       minWidth: 0,
     },
     chatBubble,
+    content: {
+      display: 'flex',
+      flexDirection: 'column',
+    },
     messageBox: {
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(1),
-      overflowY: 'auto',
       paddingTop: theme.spacing(2),
       paddingBottom: theme.spacing(2),
       paddingLeft: theme.spacing(1),
       paddingRight: theme.spacing(1),
+      flexGrow: 1,
+    },
+    messageForm: {
+      paddingBottom: theme.spacing(2),
+      backgroundColor: theme.palette.background.default,
+      position: 'sticky',
+      bottom: 0,
+    },
+    messageInputField: {
+      backgroundColor: theme.palette.background.paper,
     },
     root: {
-      height: '100vh',
+      height: '100%',
       display: 'grid',
-      gridTemplateRows: 'auto 1fr auto',
+      gridTemplateRows: 'auto 1fr',
     },
     receivedChatBubble: {
       ...chatBubble,
@@ -41,9 +55,13 @@ const useStyles = makeStyles((theme) => {
     },
     sentChatBubble: {
       ...chatBubble,
-      backgroundColor: theme.palette.primary.light,
+      backgroundColor: indigo[400],
       color: theme.palette.primary.contrastText,
       marginLeft: 'auto',
+    },
+    snackbar: {
+      position: 'absolute',
+      bottom: '80px',
     },
   };
 });
