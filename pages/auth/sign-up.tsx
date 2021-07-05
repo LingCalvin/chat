@@ -1,31 +1,33 @@
 import { Button, Container, Snackbar, Typography } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
+import { SerializedError } from '@reduxjs/toolkit';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query/react';
 import Link from 'next/link';
-import { useState } from 'react';
 import SignUpForm from '../../components/sign-up-form';
-import { signUp } from '../../lib/authentication';
+import isFetchBaseQueryError from '../../lib/type-guards/is-fetch-base-query-error';
+import { useSignUpMutation } from '../../services/auth';
 import useStyles from '../../styles/auth.styles';
+
+function errorMessage(
+  error: FetchBaseQueryError | SerializedError | undefined,
+) {
+  if (error === undefined) {
+    return '';
+  }
+  if (!isFetchBaseQueryError(error)) {
+    return 'An unexpected error has occurred.';
+  }
+  if (error.status === 409) {
+    return 'A user with that username already exists.';
+  }
+  return 'An unexpected error has occurred.';
+}
 
 export default function SignIn() {
   const classes = useStyles();
-  const [alert, setAlert] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const handleSignUp = async (username: string, password: string) => {
-    if (loading) {
-      return;
-    }
-    setLoading(true);
-    setAlert('');
-    setSuccess(false);
-    try {
-      await signUp(username, password);
-      setSuccess(true);
-    } catch (e) {
-      setAlert(e.message);
-      setLoading(false);
-    }
-  };
+  const [signUp, { isLoading, data, error }] = useSignUpMutation();
+
+  const alert = errorMessage(error);
 
   const signUpView = (
     <>
@@ -35,7 +37,8 @@ export default function SignIn() {
         TextFieldVariant="outlined"
         ButtonVariant="contained"
         ButtonColor="primary"
-        onSubmit={(data) => handleSignUp(data.username, data.password)}
+        disabled={isLoading}
+        onSubmit={signUp}
       />
     </>
   );
@@ -56,7 +59,7 @@ export default function SignIn() {
   return (
     <Container className={classes.root}>
       <div className={classes.content}>
-        {success ? successView : signUpView}
+        {data !== undefined ? successView : signUpView}
       </div>
     </Container>
   );

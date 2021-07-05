@@ -1,43 +1,37 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import jwtDecode from 'jwt-decode';
+import { UserInfo } from '../../interfaces/user-info';
 
 interface InitialAuthState {
   status: 'unauthenticated';
-  accessToken: null;
 }
 
 interface AuthenticatedAuthState {
   status: 'authenticated';
-  accessToken: string;
   id: string;
   username: string;
 }
 
 type AuthState = InitialAuthState | AuthenticatedAuthState;
 
-const initialState: AuthState = { accessToken: null } as AuthState;
+const initialState: AuthState = { status: 'unauthenticated' } as AuthState;
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setToken: (state, action: PayloadAction<string>) => {
-      const userData: { sub: string; username: string } = jwtDecode(
-        action.payload,
-      );
+    setAuthentication: (_state, action: PayloadAction<UserInfo>) => {
       return {
         status: 'authenticated',
-        accessToken: action.payload,
-        id: userData.sub,
-        username: userData.username,
+        id: action.payload.id,
+        username: action.payload.username,
       };
     },
-    clearToken: (state) => {
-      return { status: 'unauthenticated', accessToken: null };
+    clearAuthentication: (_state) => {
+      return { status: 'unauthenticated' };
     },
   },
 });
 
-export const { setToken, clearToken } = authSlice.actions;
+export const { setAuthentication, clearAuthentication } = authSlice.actions;
 const authReducer = authSlice.reducer;
 export default authReducer;

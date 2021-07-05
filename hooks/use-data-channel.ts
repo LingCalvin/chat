@@ -19,7 +19,6 @@ export interface SocketProviderProps {
 
 export default function useDataChanel() {
   const auth = useAppSelector((state) => state.auth);
-  const accessToken = auth.accessToken;
   const id = auth.status === 'authenticated' ? auth.id : null;
   const contacts = useAppSelector((state) => state.contacts.contacts);
   const conversation = useAppSelector((state) => state.conversation);
@@ -34,8 +33,8 @@ export default function useDataChanel() {
   }, [peer]);
 
   const socketUrl =
-    accessToken !== null
-      ? `${process.env.NEXT_PUBLIC_SIGNALING_SERVER}?access_token=${accessToken}`
+    auth.status === 'authenticated'
+      ? `${process.env.NEXT_PUBLIC_SIGNALING_SERVER}`
       : undefined;
 
   // Create a socket whenever the access token changes
