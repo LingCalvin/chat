@@ -32,8 +32,8 @@ export default function useDataChannel() {
   }, [peer]);
 
   const socketUrl =
-    auth.status === 'authenticated'
-      ? `${process.env.NEXT_PUBLIC_SIGNALING_SERVER}`
+    auth.status === 'authenticated' && process.env.NEXT_PUBLIC_SIGNALING_SERVER
+      ? process.env.NEXT_PUBLIC_SIGNALING_SERVER
       : null;
 
   const { readyState, sendJsonMessage } = useWebSocket(socketUrl, {
