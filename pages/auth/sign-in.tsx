@@ -38,6 +38,10 @@ export default function SignIn() {
       .then((userInfo) => {
         dispatch(setAuthentication(userInfo));
         router.push('/');
+      })
+      .catch(() => {
+        // The component will render based on the error value returned by the
+        // useSignInMutation() hook. The error does not need to be handled here.
       });
   };
 
