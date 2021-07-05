@@ -11,6 +11,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import { UIDReset } from 'react-uid';
 
 function App({ Component, pageProps }: AppProps) {
   useRemoveServerSideCSS();
@@ -23,7 +24,9 @@ function App({ Component, pageProps }: AppProps) {
         </Head>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Component {...pageProps} />
+          <UIDReset prefix="uid">
+            <Component {...pageProps} />
+          </UIDReset>
         </ThemeProvider>
       </DataChannelProvider>
     </Provider>

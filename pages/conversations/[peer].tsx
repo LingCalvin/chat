@@ -4,7 +4,6 @@ import {
   IconButton,
   InputAdornment,
   Snackbar,
-  TextField,
   Toolbar,
   Typography,
 } from '@material-ui/core';
@@ -12,6 +11,7 @@ import { Send } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
+import TextField from '../../components/text-field';
 import DataChannelContext from '../../contexts/data-channel.context';
 import { useAppSelector } from '../../hooks';
 import useStyles from '../../styles/conversation.styles';
@@ -60,6 +60,7 @@ export default function Conversation() {
   };
 
   useEffect(() => {
+    // Scroll to the bottom of the page when a new message is sent or received
     window.scrollBy(0, document.body.scrollHeight);
   }, [conversation.messages.length]);
 

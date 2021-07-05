@@ -1,14 +1,9 @@
-import {
-  Button,
-  ButtonProps,
-  TextField,
-  TextFieldProps,
-} from '@material-ui/core';
+import { Button, ButtonProps, TextFieldProps } from '@material-ui/core';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import useStyles from './form.styles';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import useUniqueId from '../hooks/use-unique-id';
+import TextField from './text-field';
 
 export type Inputs = { username: string; password: string };
 
@@ -21,6 +16,7 @@ export interface SignInFormProps {
   TextFieldVariant?: TextFieldProps['variant'];
   ButtonVariant?: ButtonProps['variant'];
   ButtonColor?: ButtonProps['color'];
+  disabled?: boolean;
   onSubmit: SubmitHandler<Inputs>;
 }
 
@@ -28,12 +24,10 @@ export default function SignInForm({
   TextFieldVariant,
   ButtonVariant,
   ButtonColor,
+  disabled,
   onSubmit,
 }: SignInFormProps) {
   const classes = useStyles();
-
-  const usernameFieldId = useUniqueId();
-  const passwordFieldId = useUniqueId();
 
   const {
     formState: { errors },
@@ -46,7 +40,6 @@ export default function SignInForm({
   return (
     <form className={classes.root} noValidate onSubmit={handleSubmit(onSubmit)}>
       <TextField
-        id={usernameFieldId}
         required
         label="Username"
         variant={TextFieldVariant}
@@ -54,9 +47,9 @@ export default function SignInForm({
         error={errors.username !== undefined}
         helperText={errors.username?.message}
         FormHelperTextProps={{ className: classes.formHelperText }}
+        disabled={disabled}
       />
       <TextField
-        id={passwordFieldId}
         required
         label="Password"
         type="password"
@@ -65,8 +58,14 @@ export default function SignInForm({
         error={errors.password !== undefined}
         helperText={errors.password?.message}
         FormHelperTextProps={{ className: classes.formHelperText }}
+        disabled={disabled}
       />
-      <Button type="submit" variant={ButtonVariant} color={ButtonColor}>
+      <Button
+        type="submit"
+        variant={ButtonVariant}
+        color={ButtonColor}
+        disabled={disabled}
+      >
         Sign in
       </Button>
     </form>
