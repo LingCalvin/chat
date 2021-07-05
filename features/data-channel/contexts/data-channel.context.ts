@@ -1,7 +1,7 @@
 import { createContext } from 'react';
-import useDataChanel from '../hooks/use-data-channel';
+import useDataChannel from '../hooks/use-data-channel';
 
-type DataChannel = ReturnType<typeof useDataChanel>;
+type DataChannel = ReturnType<typeof useDataChannel>;
 
 const DataChannelContext = createContext<DataChannel>({
   sendMessage: () => {},

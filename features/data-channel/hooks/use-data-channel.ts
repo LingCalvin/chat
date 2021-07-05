@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 import SimplePeer from 'simple-peer';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { addContact } from '../../contacts/contacts.slice';
@@ -12,19 +13,17 @@ import {
   isSignalMessage,
   Message,
 } from '../interfaces/message';
-
 export interface SocketProviderProps {
   children?: ReactNode;
 }
 
-export default function useDataChanel() {
+export default function useDataChannel() {
   const auth = useAppSelector((state) => state.auth);
   const id = auth.status === 'authenticated' ? auth.id : null;
   const contacts = useAppSelector((state) => state.contacts.contacts);
   const conversation = useAppSelector((state) => state.conversation);
   const dispatch = useAppDispatch();
 
-  const [socket, setSocket] = useState<WebSocket>();
   const [peer, setPeer] = useState<SimplePeer.Instance>();
 
   // Cleanup and close the connection
@@ -33,60 +32,12 @@ export default function useDataChanel() {
   }, [peer]);
 
   const socketUrl =
-    auth.status === 'authenticated'
-      ? `${process.env.NEXT_PUBLIC_SIGNALING_SERVER}`
-      : undefined;
+    auth.status === 'authenticated' && process.env.NEXT_PUBLIC_SIGNALING_SERVER
+      ? process.env.NEXT_PUBLIC_SIGNALING_SERVER
+      : null;
 
-  // Create a socket whenever the access token changes
-  useEffect(() => {
-    if (socketUrl !== undefined) {
-      const webSocket = new WebSocket(socketUrl);
-      setSocket(webSocket);
-      webSocket.addEventListener('close', console.warn);
-      webSocket.addEventListener('error', console.error);
-      return () => {
-        webSocket.removeEventListener('close', console.warn);
-        webSocket.removeEventListener('error', console.error);
-        webSocket.close();
-      };
-    }
-  }, [socketUrl]);
-
-  // Send a pre-signal event to the peer
-  const preSignal = useCallback(
-    (id: string, type: 'initiate' | 'accept') => {
-      const sendPreSignal = () =>
-        socket?.send(
-          JSON.stringify({
-            event: 'pre-signal',
-            data: { type, recipientId: id },
-          }),
-        ) ?? (() => {});
-      // Send the pre-signal message once the socket is open
-      if (socket?.readyState === WebSocket.OPEN) {
-        sendPreSignal();
-      } else {
-        socket?.addEventListener('open', sendPreSignal, { once: true });
-      }
-    },
-    [socket],
-  );
-
-  // Send signal data to the peer
-  const signal = useCallback(
-    (id: string, data: unknown) => {
-      socket?.send(
-        JSON.stringify({
-          event: 'signal',
-          data: { recipientId: id, signalData: data },
-        }),
-      );
-    },
-    [socket],
-  );
-
-  const onMessage = useCallback(
-    (ev: MessageEvent) => {
+  const { readyState, sendJsonMessage } = useWebSocket(socketUrl, {
+    onMessage: (ev: MessageEvent) => {
       const message: Message = JSON.parse(ev.data);
       // Handle pre-signal event sent by the initiator
       if (isPreSignalMessage(message) && message.data.type === 'initiate') {
@@ -113,8 +64,44 @@ export default function useDataChanel() {
         peer?.signal(message.data.signalData);
       }
     },
-    [contacts, dispatch, peer, preSignal],
+  });
+
+  // Keep the WebSocket connection open
+  useEffect(() => {
+    const pingDelay = Number(
+      process.env.NEXT_PUBLIC_SIGNALING_SERVER_PING_INTERVAL,
+    );
+    if (readyState === ReadyState.OPEN && pingDelay) {
+      const pingInterval = setInterval(
+        () => sendJsonMessage({ event: 'ping' }),
+        pingDelay,
+      );
+      return () => clearInterval(pingInterval);
+    }
+  }, [readyState, sendJsonMessage]);
+
+  // Send a pre-signal event to the peer
+  const preSignal = useCallback(
+    (id: string, type: 'initiate' | 'accept') => {
+      sendJsonMessage({
+        event: 'pre-signal',
+        data: { type, recipientId: id },
+      });
+    },
+    [sendJsonMessage],
   );
+
+  // Send signal data to the peer
+  const signal = useCallback(
+    (id: string, data: unknown) => {
+      sendJsonMessage({
+        event: 'signal',
+        data: { recipientId: id, signalData: data },
+      });
+    },
+    [sendJsonMessage],
+  );
+
   const sendMessage = useCallback(
     (text: string) => {
       const message = {
@@ -136,12 +123,6 @@ export default function useDataChanel() {
     },
     [conversation.otherParticipant, dispatch, id, peer],
   );
-
-  // Subscribe to socket messages
-  useEffect(() => {
-    socket?.addEventListener('message', onMessage);
-    return () => socket?.removeEventListener('message', onMessage);
-  }, [onMessage, socket]);
 
   useEffect(() => {
     // Send signal data to peer when available
