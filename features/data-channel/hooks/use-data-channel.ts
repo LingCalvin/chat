@@ -2,12 +2,17 @@ import { ReactNode, useCallback, useEffect, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import SimplePeer from 'simple-peer';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { useCreateTicketMutation } from '../../../app/services/auth';
 import { addContact } from '../../contacts/contacts.slice';
 import {
   addMessage,
   setConnectionStatus,
   setParticipant,
 } from '../../conversation/conversation-slice';
+import {
+  setConnectedToSignalingServer,
+  setWebSocketReadyState,
+} from '../data-channel.slice';
 import {
   isPreSignalMessage,
   isSignalMessage,
@@ -23,6 +28,8 @@ export default function useDataChannel() {
   const contacts = useAppSelector((state) => state.contacts.contacts);
   const conversation = useAppSelector((state) => state.conversation);
   const dispatch = useAppDispatch();
+  const [ticket, setTicket] = useState('');
+  const [createTicket] = useCreateTicketMutation();
 
   const [peer, setPeer] = useState<SimplePeer.Instance>();
 
@@ -32,11 +39,14 @@ export default function useDataChannel() {
   }, [peer]);
 
   const socketUrl =
-    auth.status === 'authenticated' && process.env.NEXT_PUBLIC_SIGNALING_SERVER
-      ? process.env.NEXT_PUBLIC_SIGNALING_SERVER
+    auth.status === 'authenticated' &&
+    process.env.NEXT_PUBLIC_SIGNALING_SERVER &&
+    ticket
+      ? `${process.env.NEXT_PUBLIC_SIGNALING_SERVER}?ticket=${ticket}`
       : null;
 
   const { readyState, sendJsonMessage } = useWebSocket(socketUrl, {
+    onClose: () => dispatch(setConnectedToSignalingServer(false)),
     onMessage: (ev: MessageEvent) => {
       const message: Message = JSON.parse(ev.data);
       // Handle pre-signal event sent by the initiator
@@ -65,6 +75,21 @@ export default function useDataChannel() {
       }
     },
   });
+
+  useEffect(() => {
+    if (auth.status === 'authenticated') {
+      createTicket(undefined)
+        .unwrap()
+        .then(({ ticket }) => {
+          setTicket(ticket);
+          dispatch(setConnectedToSignalingServer(true));
+        });
+    }
+  }, [auth.status, createTicket, dispatch]);
+
+  useEffect(() => {
+    dispatch(setWebSocketReadyState(readyState));
+  }, [dispatch, readyState]);
 
   // Keep the WebSocket connection open
   useEffect(() => {
