@@ -1,15 +1,8 @@
 import { makeStyles } from '@material-ui/core';
-import { indigo } from '@material-ui/core/colors';
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
 
 const useStyles = makeStyles((theme) => {
   const chatBubble: CSSProperties = {
-    overflowWrap: 'anywhere',
-    borderRadius: theme.shape.borderRadius * 4,
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
     maxWidth: '85%',
     [theme.breakpoints.up('sm')]: {
       maxWidth: '55%',
@@ -50,13 +43,12 @@ const useStyles = makeStyles((theme) => {
     },
     receivedChatBubble: {
       ...chatBubble,
-      backgroundColor: theme.palette.grey[300],
+      textAlign: 'left',
       marginRight: 'auto',
     },
     sentChatBubble: {
       ...chatBubble,
-      backgroundColor: indigo[400],
-      color: theme.palette.primary.contrastText,
+      textAlign: 'right',
       marginLeft: 'auto',
     },
     snackbar: {

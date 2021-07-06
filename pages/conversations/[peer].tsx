@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { useAppSelector } from '../../app/hooks';
 import TextField from '../../common/components/text-field';
+import ChatBubble from '../../features/conversation/components/chat-bubble';
 import DataChannelContext from '../../features/data-channel/contexts/data-channel.context';
 import useStyles from '../../styles/conversation.styles';
 
@@ -24,7 +25,7 @@ export default function Conversation() {
   const classes = useStyles();
   const { query } = useRouter();
 
-  const { sendMessage, connectToPeer } = useContext(DataChannelContext);
+  const { sendTextMessage, connectToPeer } = useContext(DataChannelContext);
   const auth = useAppSelector((state) => state.auth);
   const conversation = useAppSelector((state) => state.conversation);
   const roomName = useAppSelector((state) =>
@@ -54,7 +55,7 @@ export default function Conversation() {
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (canSendMessage) {
-      sendMessage(messageInput);
+      sendTextMessage(messageInput);
       setMessageInput('');
     }
   };
@@ -80,22 +81,17 @@ export default function Conversation() {
       <Toolbar />
       <Container className={classes.content}>
         <div className={classes.messageBox}>
-          {conversation.messages.map((message, i) => {
+          {conversation.messages.map((message) => {
             const isSelf = message.sender === auth.id;
             return (
-              <div
-                key={i}
+              <ChatBubble
+                key={message.id}
                 className={
                   isSelf ? classes.sentChatBubble : classes.receivedChatBubble
                 }
-                title={
-                  isSelf
-                    ? `Sent: ${new Date(message.sentDate ?? '')}`
-                    : `Received: ${new Date(message.receivedDate ?? '')}`
-                }
-              >
-                <Typography>{message.payload}</Typography>
-              </div>
+                sent={isSelf}
+                message={message}
+              />
             );
           })}
         </div>
@@ -107,7 +103,6 @@ export default function Conversation() {
             placeholder="Message"
             value={messageInput}
             onChange={handleMessageInputChange}
-            inputProps={{ 'aria-label': 'message' }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
