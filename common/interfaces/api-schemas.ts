@@ -13,6 +13,9 @@ export interface paths {
   '/auth/delete-account': {
     post: operations['AuthController_deleteAccount'];
   };
+  '/auth/tickets': {
+    post: operations['AuthController_createTicket'];
+  };
 }
 
 export interface components {
@@ -37,6 +40,9 @@ export interface components {
     };
     AccountIdDto: {
       id: string;
+    };
+    TicketResponse: {
+      ticket: string;
     };
   };
 }
@@ -146,6 +152,16 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['AccountIdDto'];
+      };
+    };
+  };
+  AuthController_createTicket: {
+    parameters: {};
+    responses: {
+      201: {
+        content: {
+          'application/json': components['schemas']['TicketResponse'];
+        };
       };
     };
   };

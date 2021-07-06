@@ -8,6 +8,15 @@ export const authApi = createApi({
     baseUrl: '/api/auth',
   }),
   endpoints: (build) => ({
+    createTicket: build.mutation<
+      components['schemas']['TicketResponse'],
+      undefined
+    >({
+      query: () => ({
+        url: '/tickets',
+        method: 'POST',
+      }),
+    }),
     signIn: build.mutation<
       components['schemas']['SignInResponse'],
       components['schemas']['CredentialsDto']
@@ -31,4 +40,5 @@ export const authApi = createApi({
   }),
 });
 
-export const { useSignInMutation, useSignUpMutation } = authApi;
+export const { useCreateTicketMutation, useSignInMutation, useSignUpMutation } =
+  authApi;
