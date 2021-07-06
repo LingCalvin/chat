@@ -1,13 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface TextMessage {
-  type: 'text';
-  payload: string;
-  sender: string | null;
-  recipient: string | null;
-  sentDate: string;
-  receivedDate: string | null;
-}
+import { findLast } from '../../common/utils/array.utils';
+import { TextMessage } from './interfaces/text.message';
 
 interface ConversationState {
   connectionStatus: 'initial' | 'connected' | 'closed';
@@ -30,6 +23,30 @@ export const conversationSlice = createSlice({
     addMessage: (state, action: PayloadAction<TextMessage>) => {
       state.messages.push(action.payload);
     },
+    markMessageDelivered: (
+      state,
+      action: PayloadAction<{ id: TextMessage['id']; date: string }>,
+    ) => {
+      const message = findLast(
+        state.messages,
+        (message) => message.id === action.payload.id,
+      );
+      if (message !== undefined && message.receivedDate === null) {
+        message.receivedDate = action.payload.date;
+      }
+    },
+    markMessageRead: (
+      state,
+      action: PayloadAction<{ id: TextMessage['id']; date: string }>,
+    ) => {
+      const message = findLast(
+        state.messages,
+        (message) => message.id === action.payload.id,
+      );
+      if (message !== undefined && message.readDate === null) {
+        message.readDate = action.payload.date;
+      }
+    },
     setParticipant: (
       state,
       action: PayloadAction<{ id: string; initiate?: boolean }>,
@@ -48,7 +65,12 @@ export const conversationSlice = createSlice({
   },
 });
 
-export const { addMessage, setParticipant, setConnectionStatus } =
-  conversationSlice.actions;
+export const {
+  addMessage,
+  markMessageDelivered,
+  markMessageRead,
+  setParticipant,
+  setConnectionStatus,
+} = conversationSlice.actions;
 const conversationReducer = conversationSlice.reducer;
 export default conversationReducer;

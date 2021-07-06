@@ -1,18 +1,25 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import SimplePeer from 'simple-peer';
+import { v4 as uuidv4 } from 'uuid';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { addContact } from '../../contacts/contacts.slice';
 import {
   addMessage,
+  markMessageDelivered,
+  markMessageRead,
   setConnectionStatus,
   setParticipant,
 } from '../../conversation/conversation-slice';
+import { DeliveryReceiptEvent } from '../interfaces/delivery-receipt.event';
 import {
   isPreSignalMessage,
   isSignalMessage,
   Message,
 } from '../interfaces/message';
+import { ReadReceiptEvent } from '../interfaces/read-receipt.event';
+import { TextMessageEvent } from '../interfaces/text-message.event';
+import { MessageEvent as DataChannelMessageEvent } from '../types/message.event';
 export interface SocketProviderProps {
   children?: ReactNode;
 }
@@ -102,11 +109,12 @@ export default function useDataChannel() {
     [sendJsonMessage],
   );
 
-  const sendMessage = useCallback(
+  const sendTextMessage = useCallback(
     (text: string) => {
-      const message = {
+      const message: TextMessageEvent = {
+        id: uuidv4(),
         type: 'text',
-        sendDate: new Date().toISOString(),
+        sentDate: new Date().toISOString(),
         payload: text,
       };
       dispatch(
@@ -115,13 +123,39 @@ export default function useDataChannel() {
           type: 'text',
           sender: id,
           recipient: conversation.otherParticipant,
-          sentDate: new Date().toISOString(),
           receivedDate: null,
+          readDate: null,
         }),
       );
       peer?.send(JSON.stringify(message));
     },
     [conversation.otherParticipant, dispatch, id, peer],
+  );
+
+  const sendDeliveryReceipt = useCallback(
+    (messageId: string, receivedDate: string) => {
+      const message: DeliveryReceiptEvent = {
+        id: uuidv4(),
+        type: 'delivery receipt',
+        payload: { messageId, receivedDate },
+        sentDate: new Date().toISOString(),
+      };
+      peer?.send(JSON.stringify(message));
+    },
+    [peer],
+  );
+
+  const sendReadReceipt = useCallback(
+    (messageId: string, readDate: string) => {
+      const message: ReadReceiptEvent = {
+        id: uuidv4(),
+        type: 'read receipt',
+        payload: { messageId, readDate },
+        sentDate: new Date().toISOString(),
+      };
+      peer?.send(JSON.stringify(message));
+    },
+    [peer],
   );
 
   useEffect(() => {
@@ -132,20 +166,33 @@ export default function useDataChannel() {
       }
     };
     // Handle data being sent along the channel
-    const handleData = (data: any) => {
-      const message: {
-        type: 'text';
-        sentDate: string;
-        payload: string;
-      } = JSON.parse(data);
-      dispatch(
-        addMessage({
-          ...message,
+    const handleData = (data: string) => {
+      const event: DataChannelMessageEvent = JSON.parse(data);
+      if (event.type === 'text') {
+        const message = {
+          ...event,
           receivedDate: new Date().toISOString(),
+          readDate: null,
           sender: conversation.otherParticipant,
           recipient: id,
-        }),
-      );
+        };
+        dispatch(addMessage(message));
+        sendDeliveryReceipt(message.id, message.receivedDate);
+      } else if (event.type === 'delivery receipt') {
+        dispatch(
+          markMessageDelivered({
+            id: event.payload.messageId,
+            date: event.payload.receivedDate,
+          }),
+        );
+      } else if (event.type === 'read receipt') {
+        dispatch(
+          markMessageRead({
+            id: event.payload.messageId,
+            date: event.payload.readDate,
+          }),
+        );
+      }
     };
     const handleConnect = () => {
       dispatch(setConnectionStatus('connected'));
@@ -169,7 +216,15 @@ export default function useDataChannel() {
       peer?.off('close', handleClose);
       peer?.off('error', handleError);
     };
-  }, [conversation.otherParticipant, dispatch, id, peer, sendMessage, signal]);
+  }, [
+    conversation.otherParticipant,
+    dispatch,
+    id,
+    peer,
+    sendDeliveryReceipt,
+    sendTextMessage,
+    signal,
+  ]);
 
   const connectToPeer = useCallback(
     (id: string) => {
@@ -177,5 +232,5 @@ export default function useDataChannel() {
     },
     [preSignal],
   );
-  return { sendMessage, connectToPeer };
+  return { sendTextMessage, sendReadReceipt, connectToPeer };
 }
