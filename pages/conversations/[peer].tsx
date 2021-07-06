@@ -3,7 +3,6 @@ import {
   Container,
   IconButton,
   InputAdornment,
-  Snackbar,
   Toolbar,
   Typography,
 } from '@material-ui/core';
@@ -95,38 +94,38 @@ export default function Conversation() {
             );
           })}
         </div>
-        <form className={classes.messageForm} onSubmit={onSubmit}>
-          <TextField
-            className={classes.messageInputField}
-            variant="outlined"
-            fullWidth
-            placeholder="Message"
-            value={messageInput}
-            onChange={handleMessageInputChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="send"
-                    type="submit"
-                    disabled={!canSendMessage}
-                  >
-                    <Send />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </form>
+        {conversation.connectionStatus === 'closed' ? (
+          <div className={classes.messageForm}>
+            <Alert variant="filled" severity="error">
+              The connection has been closed.
+            </Alert>
+          </div>
+        ) : (
+          <form className={classes.messageForm} onSubmit={onSubmit}>
+            <TextField
+              className={classes.messageInputField}
+              variant="outlined"
+              fullWidth
+              placeholder="Message"
+              value={messageInput}
+              onChange={handleMessageInputChange}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="send"
+                      type="submit"
+                      disabled={!canSendMessage}
+                    >
+                      <Send />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </form>
+        )}
       </Container>
-      <Snackbar
-        className={classes.snackbar}
-        open={conversation.connectionStatus === 'closed'}
-      >
-        <Alert variant="filled" severity="error">
-          The connection has been closed.
-        </Alert>
-      </Snackbar>
     </div>
   );
 }
