@@ -51,10 +51,6 @@ const useStyles = makeStyles((theme) => {
       textAlign: 'right',
       marginLeft: 'auto',
     },
-    snackbar: {
-      position: 'absolute',
-      bottom: '80px',
-    },
   };
 });
 
