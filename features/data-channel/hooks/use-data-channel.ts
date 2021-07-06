@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import SimplePeer from 'simple-peer';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,11 +12,12 @@ import {
   setConnectionStatus,
   setParticipant,
 } from '../../conversation/conversation-slice';
-import { DeliveryReceiptEvent } from '../interfaces/delivery-receipt.event';
+import { sendNotification } from '../../notifications/utils/notification.utils';
 import {
   setConnectedToSignalingServer,
   setWebSocketReadyState,
 } from '../data-channel.slice';
+import { DeliveryReceiptEvent } from '../interfaces/delivery-receipt.event';
 import {
   isPreSignalMessage,
   isSignalMessage,
@@ -37,6 +38,12 @@ export default function useDataChannel() {
   const dispatch = useAppDispatch();
   const [ticket, setTicket] = useState('');
   const [createTicket] = useCreateTicketMutation();
+
+  const activeContact = useMemo(() => {
+    return contacts.find(
+      (contact) => contact.id === conversation.otherParticipant,
+    );
+  }, [contacts, conversation.otherParticipant]);
 
   const [peer, setPeer] = useState<SimplePeer.Instance>();
 
@@ -201,6 +208,9 @@ export default function useDataChannel() {
           sender: conversation.otherParticipant,
           recipient: id,
         };
+        sendNotification(activeContact?.username ?? '', {
+          body: message.payload,
+        });
         dispatch(addMessage(message));
         sendDeliveryReceipt(message.id, message.receivedDate);
       } else if (event.type === 'delivery receipt') {
@@ -242,6 +252,7 @@ export default function useDataChannel() {
       peer?.off('error', handleError);
     };
   }, [
+    activeContact?.username,
     conversation.otherParticipant,
     dispatch,
     id,
