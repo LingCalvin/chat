@@ -22,5 +22,18 @@ export const store = configureStore({
 
 setupListeners(store.dispatch);
 
+// Persist settings to local storage
+let previousSettings:
+  | ReturnType<typeof store['getState']>['settings']
+  | undefined = undefined;
+
+store.subscribe(() => {
+  const { settings: currentSettings } = store.getState();
+  if (currentSettings !== previousSettings) {
+    localStorage.setItem('settings', JSON.stringify(currentSettings));
+  }
+  previousSettings = currentSettings;
+});
+
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
