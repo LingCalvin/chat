@@ -14,6 +14,9 @@ const useStyles = makeStyles((theme) => ({
   idContainer: {
     textAlign: 'center',
   },
+  overflowMenuButton: {
+    marginLeft: 'auto',
+  },
   root: {
     display: 'flex',
     flexDirection: 'column',
@@ -22,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     gap: theme.spacing(1),
   },
-
   unauthenticatedView: {
     display: 'flex',
     flexDirection: 'column',

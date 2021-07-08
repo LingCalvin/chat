@@ -8,15 +8,14 @@ export const authApi = createApi({
     baseUrl: '/api/auth',
   }),
   endpoints: (build) => ({
-    createTicket: build.mutation<
-      components['schemas']['TicketResponse'],
-      undefined
-    >({
-      query: () => ({
-        url: '/tickets',
-        method: 'POST',
-      }),
-    }),
+    createTicket: build.mutation<components['schemas']['TicketResponse'], void>(
+      {
+        query: () => ({
+          url: '/tickets',
+          method: 'POST',
+        }),
+      },
+    ),
     signIn: build.mutation<
       components['schemas']['SignInResponse'],
       components['schemas']['CredentialsDto']
@@ -37,8 +36,15 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
+    whoAmI: build.query<components['schemas']['WhoAmIResponse'], void>({
+      query: () => `/who-am-i`,
+    }),
   }),
 });
 
-export const { useCreateTicketMutation, useSignInMutation, useSignUpMutation } =
-  authApi;
+export const {
+  useCreateTicketMutation,
+  useSignInMutation,
+  useSignUpMutation,
+  useLazyWhoAmIQuery,
+} = authApi;

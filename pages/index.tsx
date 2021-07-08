@@ -1,8 +1,19 @@
-import { Button, Container, Typography } from '@material-ui/core';
+import {
+  AppBar,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+} from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { ReadyState } from 'react-use-websocket';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import ConnectForm from '../features/conversation/components/connect-form';
 import { setParticipant } from '../features/conversation/conversation-slice';
@@ -27,6 +38,11 @@ export default function Home() {
   const chatPartner = useAppSelector(
     (state) => state.conversation.otherParticipant,
   );
+  const connectionStatus = useAppSelector(
+    (state) => state.dataChannel.webSocketReadyState,
+  );
+
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     if (chatPartner !== null) {
@@ -54,6 +70,28 @@ export default function Home() {
 
   const authenticatedView = (
     <>
+      <AppBar color="transparent" elevation={0}>
+        <Toolbar>
+          <IconButton
+            className={classes.overflowMenuButton}
+            edge="end"
+            color="inherit"
+            onClick={(e) => setMenuAnchor(e.currentTarget)}
+          >
+            <MoreVert />
+          </IconButton>
+          <Menu
+            open={menuAnchor !== null}
+            anchorEl={menuAnchor}
+            onClose={() => setMenuAnchor(null)}
+          >
+            <Link passHref href="/settings">
+              <MenuItem>Settings</MenuItem>
+            </Link>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
       <Typography variant="h2" component="h1">
         Connect to peer
       </Typography>
@@ -66,6 +104,7 @@ export default function Home() {
         </Typography>
       </div>
       <ConnectForm
+        disabled={connectionStatus !== ReadyState.OPEN}
         onSubmit={({ id }) => {
           dispatch(setParticipant({ id, initiate: true }));
           router.push(`/conversations/${id}`);

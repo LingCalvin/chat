@@ -16,6 +16,7 @@ const useStyles = makeStyles((theme) => {
     content: {
       display: 'flex',
       flexDirection: 'column',
+      backgroundColor: theme.palette.background.paper,
     },
     messageBox: {
       display: 'flex',
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => {
     },
     messageForm: {
       paddingBottom: theme.spacing(2),
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.background.paper,
       position: 'sticky',
       bottom: 0,
     },
