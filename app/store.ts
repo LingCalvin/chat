@@ -18,6 +18,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(authApi.middleware),
+  devTools: process.env.NODE_ENV === 'development',
 });
 
 setupListeners(store.dispatch);
