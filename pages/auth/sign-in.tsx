@@ -3,7 +3,8 @@ import { Alert } from '@material-ui/lab';
 import { SerializedError } from '@reduxjs/toolkit';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query/react';
 import { useRouter } from 'next/router';
-import { useAppDispatch } from '../../app/hooks';
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { useSignInMutation } from '../../app/services/auth';
 import isFetchBaseQueryError from '../../common/type-guards/is-fetch-base-query-error';
 import { setAuthentication } from '../../features/auth/auth-slice';
@@ -31,13 +32,19 @@ export default function SignIn() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [signIn, { isLoading, error }] = useSignInMutation();
+  const authStatus = useAppSelector((state) => state.auth.status);
+
+  useEffect(() => {
+    if (authStatus === 'authenticated') {
+      router.push('/');
+    }
+  }, [authStatus, router]);
 
   const handleSignIn = (credentials: Credentials) => {
     signIn(credentials)
       .unwrap()
       .then((userInfo) => {
         dispatch(setAuthentication(userInfo));
-        router.push('/');
       })
       .catch(() => {
         // The component will render based on the error value returned by the

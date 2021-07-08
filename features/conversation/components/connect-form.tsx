@@ -7,10 +7,11 @@ export type Inputs = {
 };
 
 export interface ConnectFormProps {
+  disabled?: boolean;
   onSubmit: SubmitHandler<Inputs>;
 }
 
-export default function ConnectForm({ onSubmit }: ConnectFormProps) {
+export default function ConnectForm({ disabled, onSubmit }: ConnectFormProps) {
   const { handleSubmit, register } = useForm<Inputs>();
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -22,7 +23,9 @@ export default function ConnectForm({ onSubmit }: ConnectFormProps) {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <Button type="submit">Connect</Button>
+              <Button type="submit" disabled={disabled}>
+                Connect
+              </Button>
             </InputAdornment>
           ),
         }}

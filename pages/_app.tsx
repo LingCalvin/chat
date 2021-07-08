@@ -10,6 +10,7 @@ import { UIDReset } from 'react-uid';
 import { store } from '../app/store';
 import useRemoveServerSideCSS from '../common/hooks/use-remove-server-side-css';
 import DataChannelProvider from '../features/data-channel/components/data-channel.provider';
+import PersistanceLoader from '../features/perisistance/components/peristance-loader';
 import '../styles/globals.css';
 import theme from '../theme';
 
@@ -18,6 +19,7 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <Provider store={store}>
+      <PersistanceLoader />
       <DataChannelProvider>
         <Head>
           <title>Chat</title>

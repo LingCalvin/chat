@@ -65,12 +65,12 @@ export default function Conversation() {
   }, [conversation.messages.length]);
 
   if (auth.status !== 'authenticated') {
-    return <></>;
+    return null;
   }
 
   return (
     <div className={classes.root}>
-      <AppBar className={classes.appBar} position="fixed">
+      <AppBar className={classes.appBar} color="inherit" position="fixed">
         <Toolbar>
           <Typography noWrap variant="h4" component="h1">
             {roomName}

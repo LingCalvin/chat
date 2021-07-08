@@ -16,6 +16,9 @@ export interface paths {
   '/auth/tickets': {
     post: operations['AuthController_createTicket'];
   };
+  '/auth/who-am-i': {
+    get: operations['AuthController_whoAmI'];
+  };
 }
 
 export interface components {
@@ -43,6 +46,12 @@ export interface components {
     };
     TicketResponse: {
       ticket: string;
+    };
+    WhoAmIResponse: {
+      exp: number;
+      jti: string;
+      sub: string;
+      username: string;
     };
   };
 }
@@ -161,6 +170,16 @@ export interface operations {
       201: {
         content: {
           'application/json': components['schemas']['TicketResponse'];
+        };
+      };
+    };
+  };
+  AuthController_whoAmI: {
+    parameters: {};
+    responses: {
+      200: {
+        content: {
+          'application/json': components['schemas']['WhoAmIResponse'];
         };
       };
     };
