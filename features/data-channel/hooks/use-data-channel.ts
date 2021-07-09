@@ -1,7 +1,6 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { ReadyState } from 'react-use-websocket';
 import SimplePeer from 'simple-peer';
-import { v4 as uuidv4 } from 'uuid';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { useCreateTicketMutation } from '../../../app/services/auth';
 import useSyncedRef from '../../../common/hooks/use-synced-ref';
@@ -23,8 +22,13 @@ import {
   isSignalMessage,
   Message,
 } from '../interfaces/message';
-import { TextMessageEvent } from '../interfaces/text-message.event';
 import { DataChannelEvent } from '../types/data-channel.event';
+import {
+  callEndEvent,
+  deliveryReceiptEvent,
+  readReceiptEvent,
+  textMessageEvent,
+} from '../utils/data-channel-event.utils';
 import useWebSocket from './use-web-socket';
 export interface SocketProviderProps {
   children?: ReactNode;
@@ -161,16 +165,10 @@ export default function useDataChannel() {
 
   const sendTextMessage = useCallback(
     (text: string) => {
-      const message: TextMessageEvent = {
-        id: uuidv4(),
-        type: 'text',
-        sentDate: new Date().toISOString(),
-        payload: text,
-      };
+      const message = textMessageEvent(text);
       dispatch(
         addMessage({
           ...message,
-          type: 'text',
           sender: id,
           recipient: conversation.otherParticipant,
           receivedDate: null,
@@ -184,27 +182,27 @@ export default function useDataChannel() {
 
   const sendDeliveryReceipt = useCallback(
     (messageId: string, receivedDate: string) => {
-      sendDataChannelEvent({
-        id: uuidv4(),
-        type: 'delivery receipt',
-        payload: { messageId, receivedDate },
-        sentDate: new Date().toISOString(),
-      });
+      sendDataChannelEvent(deliveryReceiptEvent(messageId, receivedDate));
     },
     [sendDataChannelEvent],
   );
 
   const sendReadReceipt = useCallback(
     (messageId: string, readDate: string) => {
-      sendDataChannelEvent({
-        id: uuidv4(),
-        type: 'read receipt',
-        payload: { messageId, readDate },
-        sentDate: new Date().toISOString(),
-      });
+      sendDataChannelEvent(readReceiptEvent(messageId, readDate));
     },
     [sendDataChannelEvent],
   );
+
+  const initializeMediaStream = useCallback(async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    setSelfStream(stream);
+    peer?.addStream(stream);
+    return stream;
+  }, [peer]);
 
   useEffect(() => {
     // Send signal data to peer when available
@@ -273,13 +271,7 @@ export default function useDataChannel() {
     const handleStream = (stream: MediaStream) => {
       setPeerStream(stream);
       if (!selfStreamRef.current) {
-        navigator.mediaDevices
-          .getUserMedia({ video: true, audio: true })
-          .then((stream) => {
-            // Keep track of the user's stream
-            setSelfStream(stream);
-            peer?.addStream(stream);
-          });
+        initializeMediaStream();
       }
     };
     peer?.on('signal', handleSignal);
@@ -301,34 +293,25 @@ export default function useDataChannel() {
     conversation.otherParticipant,
     dispatch,
     id,
+    initializeMediaStream,
     notificationSettings,
     peer,
-    peerStreamRef,
     selfStreamRef,
     sendDeliveryReceipt,
-    sendTextMessage,
     signal,
   ]);
 
   const connectToPeer = useCallback(
-    (id: string) => {
-      preSignal(id, 'initiate');
-    },
+    (id: string) => preSignal(id, 'initiate'),
     [preSignal],
   );
 
   const startVideoCall = useCallback(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        setSelfStream(stream);
-        peer?.addStream(stream);
-      })
-      .catch(console.error);
-  }, [peer]);
+    initializeMediaStream().catch(console.error);
+  }, [initializeMediaStream]);
 
   const endVideoCall = useCallback(() => {
-    sendDataChannelEvent({ id: uuidv4(), type: 'call end' });
+    sendDataChannelEvent(callEndEvent());
     selfStreamRef.current?.getTracks().forEach((track) => {
       track.stop();
     });
