@@ -13,7 +13,7 @@ import { TextMessageEvent } from '../interfaces/text-message.event';
  * This function returning a UUID is an implementation detail and the format
  * returned should not be relied upon.
  */
-function uid() {
+function uid(): string {
   return uuidv4();
 }
 /**

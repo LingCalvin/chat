@@ -11,7 +11,13 @@ import {
 import { MoreVert, Send, VideoCall as VideoCallIcon } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
+import {
+  ChangeEventHandler,
+  FormEventHandler,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { useAppSelector } from '../../app/hooks';
 import TextField from '../../common/components/text-field';
 import useMenu from '../../common/hooks/use-menu';
@@ -52,7 +58,7 @@ export default function Conversation() {
 
   const [messageInput, setMessageInput] = useState('');
 
-  const handleMessageInputChange: React.ChangeEventHandler<
+  const handleMessageInputChange: ChangeEventHandler<
     HTMLTextAreaElement | HTMLInputElement
   > = (e) => {
     e.preventDefault();
@@ -62,7 +68,7 @@ export default function Conversation() {
   const canSendMessage =
     messageInput.length > 0 && conversation.connectionStatus === 'connected';
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (canSendMessage) {
       sendTextMessage(messageInput);
