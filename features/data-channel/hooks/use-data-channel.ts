@@ -18,16 +18,14 @@ import {
   setConnectedToSignalingServer,
   setWebSocketReadyState,
 } from '../data-channel.slice';
-import { CallEndEvent } from '../interfaces/call-end.event';
-import { DeliveryReceiptEvent } from '../interfaces/delivery-receipt.event';
 import {
   isPreSignalMessage,
   isSignalMessage,
   Message,
 } from '../interfaces/message';
-import { ReadReceiptEvent } from '../interfaces/read-receipt.event';
 import { TextMessageEvent } from '../interfaces/text-message.event';
 import { DataChannelEvent } from '../types/data-channel.event';
+import { WebSocketRequest } from '../types/web-socket-request';
 export interface SocketProviderProps {
   children?: ReactNode;
 }
@@ -56,6 +54,13 @@ export default function useDataChannel() {
   }, [contacts, conversation.otherParticipant]);
 
   const [peer, setPeer] = useState<SimplePeer.Instance>();
+
+  const sendDataChannelEvent = useCallback(
+    (event: DataChannelEvent) => {
+      peer?.send(JSON.stringify(event));
+    },
+    [peer],
+  );
 
   // Cleanup and close the connection
   useEffect(() => {
@@ -100,6 +105,13 @@ export default function useDataChannel() {
     },
   });
 
+  const sendWebSocketMessage = useCallback(
+    (message: WebSocketRequest) => {
+      sendJsonMessage(message);
+    },
+    [sendJsonMessage],
+  );
+
   useEffect(() => {
     if (auth.status === 'authenticated') {
       createTicket()
@@ -122,33 +134,33 @@ export default function useDataChannel() {
     );
     if (readyState === ReadyState.OPEN && pingDelay) {
       const pingInterval = setInterval(
-        () => sendJsonMessage({ event: 'ping' }),
+        () => sendWebSocketMessage({ event: 'ping' }),
         pingDelay,
       );
       return () => clearInterval(pingInterval);
     }
-  }, [readyState, sendJsonMessage]);
+  }, [readyState, sendWebSocketMessage]);
 
   // Send a pre-signal event to the peer
   const preSignal = useCallback(
     (id: string, type: 'initiate' | 'accept') => {
-      sendJsonMessage({
+      sendWebSocketMessage({
         event: 'pre-signal',
         data: { type, recipientId: id },
       });
     },
-    [sendJsonMessage],
+    [sendWebSocketMessage],
   );
 
   // Send signal data to the peer
   const signal = useCallback(
     (id: string, data: unknown) => {
-      sendJsonMessage({
+      sendWebSocketMessage({
         event: 'signal',
         data: { recipientId: id, signalData: data },
       });
     },
-    [sendJsonMessage],
+    [sendWebSocketMessage],
   );
 
   const sendTextMessage = useCallback(
@@ -169,35 +181,33 @@ export default function useDataChannel() {
           readDate: null,
         }),
       );
-      peer?.send(JSON.stringify(message));
+      sendDataChannelEvent(message);
     },
-    [conversation.otherParticipant, dispatch, id, peer],
+    [conversation.otherParticipant, dispatch, id, sendDataChannelEvent],
   );
 
   const sendDeliveryReceipt = useCallback(
     (messageId: string, receivedDate: string) => {
-      const message: DeliveryReceiptEvent = {
+      sendDataChannelEvent({
         id: uuidv4(),
         type: 'delivery receipt',
         payload: { messageId, receivedDate },
         sentDate: new Date().toISOString(),
-      };
-      peer?.send(JSON.stringify(message));
+      });
     },
-    [peer],
+    [sendDataChannelEvent],
   );
 
   const sendReadReceipt = useCallback(
     (messageId: string, readDate: string) => {
-      const message: ReadReceiptEvent = {
+      sendDataChannelEvent({
         id: uuidv4(),
         type: 'read receipt',
         payload: { messageId, readDate },
         sentDate: new Date().toISOString(),
-      };
-      peer?.send(JSON.stringify(message));
+      });
     },
-    [peer],
+    [sendDataChannelEvent],
   );
 
   useEffect(() => {
@@ -322,8 +332,7 @@ export default function useDataChannel() {
   }, [peer]);
 
   const endVideoCall = useCallback(() => {
-    const event: CallEndEvent = { id: uuidv4(), type: 'call end' };
-    peer?.send(JSON.stringify(event));
+    sendDataChannelEvent({ id: uuidv4(), type: 'call end' });
     selfStreamRef.current?.getTracks().forEach((track) => {
       track.stop();
     });
@@ -332,7 +341,7 @@ export default function useDataChannel() {
     }
     setSelfStream(undefined);
     setPeerStream(undefined);
-  }, [peer, selfStreamRef]);
+  }, [peer, selfStreamRef, sendDataChannelEvent]);
 
   return {
     sendTextMessage,
