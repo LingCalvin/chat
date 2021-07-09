@@ -3,16 +3,20 @@ import {
   Container,
   IconButton,
   InputAdornment,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from '@material-ui/core';
-import { Send } from '@material-ui/icons';
+import { MoreVert, Send, VideoCall as VideoCallIcon } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { useAppSelector } from '../../app/hooks';
 import TextField from '../../common/components/text-field';
+import useMenu from '../../common/hooks/use-menu';
 import ChatBubble from '../../features/conversation/components/chat-bubble';
+import VideoCall from '../../features/conversation/components/video-call';
 import DataChannelContext from '../../features/data-channel/contexts/data-channel.context';
 import useStyles from '../../styles/conversation.styles';
 
@@ -22,9 +26,16 @@ export type Inputs = {
 
 export default function Conversation() {
   const classes = useStyles();
-  const { query } = useRouter();
+  const router = useRouter();
+  const { query } = router;
 
-  const { sendTextMessage, connectToPeer } = useContext(DataChannelContext);
+  const {
+    sendTextMessage,
+    connectToPeer,
+    peerStream: stream,
+    startVideoCall,
+    endVideoCall,
+  } = useContext(DataChannelContext);
   const auth = useAppSelector((state) => state.auth);
   const conversation = useAppSelector((state) => state.conversation);
   const roomName = useAppSelector((state) =>
@@ -64,8 +75,14 @@ export default function Conversation() {
     window.scrollBy(0, document.body.scrollHeight);
   }, [conversation.messages.length]);
 
+  const menu = useMenu();
+
   if (auth.status !== 'authenticated') {
     return null;
+  }
+
+  if (stream) {
+    return <VideoCall stream={stream} onEndCall={endVideoCall} />;
   }
 
   return (
@@ -75,7 +92,22 @@ export default function Conversation() {
           <Typography noWrap variant="h4" component="h1">
             {roomName}
           </Typography>
+          <div className={classes.spacer} />
+          <IconButton
+            aria-label="video call"
+            color="inherit"
+            onClick={startVideoCall}
+            disabled={conversation.connectionStatus !== 'connected'}
+          >
+            <VideoCallIcon />
+          </IconButton>
+          <IconButton aria-label="menu" edge="end" onClick={menu.handleClick}>
+            <MoreVert />
+          </IconButton>
         </Toolbar>
+        <Menu anchorEl={menu.anchorEl} open={menu.open} onClose={menu.onClose}>
+          <MenuItem onClick={() => router.push('/settings')}>Settings</MenuItem>
+        </Menu>
       </AppBar>
       <Toolbar />
       <Container className={classes.content}>

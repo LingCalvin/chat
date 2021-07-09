@@ -7,6 +7,9 @@ const DataChannelContext = createContext<DataChannel>({
   connectToPeer: () => {},
   sendReadReceipt: () => {},
   sendTextMessage: () => {},
+  startVideoCall: () => {},
+  endVideoCall: () => {},
+  peerStream: undefined,
 });
 
 export default DataChannelContext;

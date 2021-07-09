@@ -18,6 +18,7 @@ import {
   setConnectedToSignalingServer,
   setWebSocketReadyState,
 } from '../data-channel.slice';
+import { CallEndEvent } from '../interfaces/call-end.event';
 import { DeliveryReceiptEvent } from '../interfaces/delivery-receipt.event';
 import {
   isPreSignalMessage,
@@ -26,7 +27,7 @@ import {
 } from '../interfaces/message';
 import { ReadReceiptEvent } from '../interfaces/read-receipt.event';
 import { TextMessageEvent } from '../interfaces/text-message.event';
-import { MessageEvent as DataChannelMessageEvent } from '../types/message.event';
+import { DataChannelEvent } from '../types/data-channel.event';
 export interface SocketProviderProps {
   children?: ReactNode;
 }
@@ -42,6 +43,11 @@ export default function useDataChannel() {
 
   const settings = useAppSelector((state) => state.settings.notifications);
   const notificationSettings = useSyncedRef(settings);
+
+  const [peerStream, setPeerStream] = useState<MediaStream>();
+  const peerStreamRef = useSyncedRef(peerStream);
+  const [selfStream, setSelfStream] = useState<MediaStream>();
+  const selfStreamRef = useSyncedRef(selfStream);
 
   const activeContact = useMemo(() => {
     return contacts.find(
@@ -203,7 +209,7 @@ export default function useDataChannel() {
     };
     // Handle data being sent along the channel
     const handleData = (data: string) => {
-      const event: DataChannelMessageEvent = JSON.parse(data);
+      const event: DataChannelEvent = JSON.parse(data);
       if (event.type === 'text') {
         const message = {
           ...event,
@@ -237,6 +243,15 @@ export default function useDataChannel() {
             date: event.payload.readDate,
           }),
         );
+      } else if (event.type === 'call end') {
+        if (selfStreamRef.current) {
+          selfStreamRef.current.getTracks().forEach((track) => {
+            track.stop();
+          });
+          peer?.removeStream(selfStreamRef.current);
+        }
+        setPeerStream(undefined);
+        setSelfStream(undefined);
       }
     };
     const handleConnect = () => {
@@ -249,14 +264,28 @@ export default function useDataChannel() {
       console.error(e);
       dispatch(setConnectionStatus('closed'));
     };
+    const handleStream = (stream: MediaStream) => {
+      setPeerStream(stream);
+      if (!selfStreamRef.current) {
+        navigator.mediaDevices
+          .getUserMedia({ video: true, audio: true })
+          .then((stream) => {
+            // Keep track of the user's stream
+            setSelfStream(stream);
+            peer?.addStream(stream);
+          });
+      }
+    };
     peer?.on('signal', handleSignal);
     peer?.on('data', handleData);
+    peer?.on('stream', handleStream);
     peer?.on('connect', handleConnect);
     peer?.on('close', handleClose);
     peer?.on('error', handleError);
     return () => {
       peer?.off('signal', handleSignal);
       peer?.off('data', handleData);
+      peer?.off('stream', handleStream);
       peer?.off('connect', handleConnect);
       peer?.off('close', handleClose);
       peer?.off('error', handleError);
@@ -268,6 +297,8 @@ export default function useDataChannel() {
     id,
     notificationSettings,
     peer,
+    peerStreamRef,
+    selfStreamRef,
     sendDeliveryReceipt,
     sendTextMessage,
     signal,
@@ -279,5 +310,36 @@ export default function useDataChannel() {
     },
     [preSignal],
   );
-  return { sendTextMessage, sendReadReceipt, connectToPeer };
+
+  const startVideoCall = useCallback(() => {
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        setSelfStream(stream);
+        peer?.addStream(stream);
+      })
+      .catch(console.error);
+  }, [peer]);
+
+  const endVideoCall = useCallback(() => {
+    const event: CallEndEvent = { id: uuidv4(), type: 'call end' };
+    peer?.send(JSON.stringify(event));
+    selfStreamRef.current?.getTracks().forEach((track) => {
+      track.stop();
+    });
+    if (selfStreamRef.current) {
+      peer?.removeStream(selfStreamRef.current);
+    }
+    setSelfStream(undefined);
+    setPeerStream(undefined);
+  }, [peer, selfStreamRef]);
+
+  return {
+    sendTextMessage,
+    sendReadReceipt,
+    connectToPeer,
+    startVideoCall,
+    endVideoCall,
+    peerStream,
+  };
 }
