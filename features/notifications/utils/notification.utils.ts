@@ -5,7 +5,10 @@
  * @param title - The title of the notification
  * @param options - The notification options
  */
-export function sendNotification(title: string, options: NotificationOptions) {
+export function sendNotification(
+  title: string,
+  options: NotificationOptions,
+): void {
   if (
     Notification.permission === 'granted' &&
     document.visibilityState === 'hidden'

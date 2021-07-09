@@ -1,7 +1,7 @@
 /**
  * Capitalizes the first letter of a string.
  *
- * @param string The string to capitalize
+ * @param string - The string to capitalize
  * @returns The string with the first letter capitalized
  */
 export function capitalize(string: string): string {

@@ -47,7 +47,6 @@ export default function useDataChannel() {
   const notificationSettings = useSyncedRef(settings);
 
   const [peerStream, setPeerStream] = useState<MediaStream>();
-  const peerStreamRef = useSyncedRef(peerStream);
   const [selfStream, setSelfStream] = useState<MediaStream>();
   const selfStreamRef = useSyncedRef(selfStream);
 

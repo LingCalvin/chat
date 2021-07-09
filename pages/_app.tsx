@@ -8,11 +8,11 @@ import Head from 'next/head';
 import { Provider } from 'react-redux';
 import { UIDReset } from 'react-uid';
 import { store } from '../app/store';
+import theme from '../common/constants/theme';
 import useRemoveServerSideCSS from '../common/hooks/use-remove-server-side-css';
 import DataChannelProvider from '../features/data-channel/components/data-channel.provider';
 import PersistanceLoader from '../features/perisistance/components/peristance-loader';
 import '../styles/globals.css';
-import theme from '../theme';
 
 function App({ Component, pageProps }: AppProps) {
   useRemoveServerSideCSS();
