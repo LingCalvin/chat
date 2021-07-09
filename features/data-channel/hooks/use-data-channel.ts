@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { ReadyState } from 'react-use-websocket';
 import SimplePeer from 'simple-peer';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
@@ -25,7 +25,7 @@ import {
 } from '../interfaces/message';
 import { TextMessageEvent } from '../interfaces/text-message.event';
 import { DataChannelEvent } from '../types/data-channel.event';
-import { WebSocketRequest } from '../types/web-socket-request';
+import useWebSocket from './use-web-socket';
 export interface SocketProviderProps {
   children?: ReactNode;
 }
@@ -74,42 +74,38 @@ export default function useDataChannel() {
       ? `${process.env.NEXT_PUBLIC_SIGNALING_SERVER}?ticket=${ticket}`
       : null;
 
-  const { readyState, sendJsonMessage } = useWebSocket(socketUrl, {
-    onClose: () => dispatch(setConnectedToSignalingServer(false)),
-    onMessage: (ev: MessageEvent) => {
-      const message: Message = JSON.parse(ev.data);
-      // Handle pre-signal event sent by the initiator
-      if (isPreSignalMessage(message) && message.data.type === 'initiate') {
-        dispatch(setParticipant({ id: message.data.sender.id }));
-        dispatch(addContact(message.data.sender));
-        preSignal(message.data.sender.id, 'accept');
-        // Create a new peer connection
-        setPeer(new SimplePeer());
-        // Handle pre-signal event sent by the acceptor
-      } else if (
-        isPreSignalMessage(message) &&
-        message.data.type === 'accept'
-      ) {
-        dispatch(setParticipant({ id: message.data.sender.id }));
-        dispatch(addContact(message.data.sender));
-        // Initiate a new peer connection
-        setPeer(new SimplePeer({ initiator: true }));
-        // Handle signal events sent by known contacts
-      } else if (
-        isSignalMessage(message) &&
-        message.data.signalData &&
-        contacts.some((contact) => contact.id === message.data.sender.id)
-      ) {
-        peer?.signal(message.data.signalData);
-      }
+  const { readyState, sendMessage: sendWebSocketMessage } = useWebSocket(
+    socketUrl,
+    {
+      onClose: () => dispatch(setConnectedToSignalingServer(false)),
+      onMessage: (ev: MessageEvent) => {
+        const message: Message = JSON.parse(ev.data);
+        // Handle pre-signal event sent by the initiator
+        if (isPreSignalMessage(message) && message.data.type === 'initiate') {
+          dispatch(setParticipant({ id: message.data.sender.id }));
+          dispatch(addContact(message.data.sender));
+          preSignal(message.data.sender.id, 'accept');
+          // Create a new peer connection
+          setPeer(new SimplePeer());
+          // Handle pre-signal event sent by the acceptor
+        } else if (
+          isPreSignalMessage(message) &&
+          message.data.type === 'accept'
+        ) {
+          dispatch(setParticipant({ id: message.data.sender.id }));
+          dispatch(addContact(message.data.sender));
+          // Initiate a new peer connection
+          setPeer(new SimplePeer({ initiator: true }));
+          // Handle signal events sent by known contacts
+        } else if (
+          isSignalMessage(message) &&
+          message.data.signalData &&
+          contacts.some((contact) => contact.id === message.data.sender.id)
+        ) {
+          peer?.signal(message.data.signalData);
+        }
+      },
     },
-  });
-
-  const sendWebSocketMessage = useCallback(
-    (message: WebSocketRequest) => {
-      sendJsonMessage(message);
-    },
-    [sendJsonMessage],
   );
 
   useEffect(() => {
