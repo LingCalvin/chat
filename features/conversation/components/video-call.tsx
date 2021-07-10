@@ -1,18 +1,28 @@
+import { Snackbar } from '@material-ui/core';
 import { useEffect, useRef } from 'react';
-import useToggle from '../../../common/hooks/use-toggle';
-import useStyles from '../../../styles/video-call.styles';
 import VideoCallControls from './video-call-controls';
+import useStyles from './video-call.styles';
 
 interface VideoCallProps {
   stream: MediaStream;
+  micEnabled: boolean;
+  videoEnabled: boolean;
+  selfStreamUnstable?: boolean;
+  onToggleMic: () => void;
+  onToggleVideo: () => void;
   onEndCall: () => void;
 }
 
-export default function VideoCall({ stream, onEndCall }: VideoCallProps) {
+export default function VideoCall({
+  stream,
+  micEnabled,
+  videoEnabled,
+  selfStreamUnstable,
+  onToggleMic,
+  onToggleVideo,
+  onEndCall,
+}: VideoCallProps) {
   const classes = useStyles();
-
-  const { state: micOn, toggle: toggleMic } = useToggle(true);
-  const { state: videoOn, toggle: toggleVideo } = useToggle(true);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -29,13 +39,18 @@ export default function VideoCall({ stream, onEndCall }: VideoCallProps) {
       </div>
       <div className={classes.controlsContainer}>
         <VideoCallControls
-          micOn={micOn}
-          videoOn={videoOn}
+          micOn={micEnabled}
+          videoOn={videoEnabled}
           onHangUp={onEndCall}
-          onMicToggle={toggleMic}
-          onVideoToggle={toggleVideo}
+          onMicToggle={onToggleMic}
+          onVideoToggle={onToggleVideo}
         />
       </div>
+      <Snackbar
+        className={classes.snackBar}
+        open={selfStreamUnstable}
+        message="Your connection is unstable."
+      />
     </div>
   );
 }

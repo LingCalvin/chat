@@ -38,9 +38,14 @@ export default function Conversation() {
   const {
     sendTextMessage,
     connectToPeer,
-    peerStream: stream,
+    peerStream,
+    selfStreamUnstable,
     startVideoCall,
     endVideoCall,
+    toggleAudio,
+    toggleVideo,
+    audioEnabled,
+    videoEnabled,
   } = useContext(DataChannelContext);
   const auth = useAppSelector((state) => state.auth);
   const conversation = useAppSelector((state) => state.conversation);
@@ -87,8 +92,18 @@ export default function Conversation() {
     return null;
   }
 
-  if (stream) {
-    return <VideoCall stream={stream} onEndCall={endVideoCall} />;
+  if (peerStream) {
+    return (
+      <VideoCall
+        stream={peerStream}
+        micEnabled={audioEnabled}
+        videoEnabled={videoEnabled}
+        onToggleMic={toggleAudio}
+        onToggleVideo={toggleVideo}
+        onEndCall={endVideoCall}
+        selfStreamUnstable={selfStreamUnstable}
+      />
+    );
   }
 
   return (

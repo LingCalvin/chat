@@ -37,6 +37,9 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '100%',
     maxWidth: '33%',
   },
+  snackBar: {
+    bottom: 90,
+  },
 }));
 
 export default useStyles;
