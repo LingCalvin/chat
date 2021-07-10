@@ -15,6 +15,11 @@ const DataChannelContext = createContext<DataChannel>({
   sendTextMessage: noOp,
   startVideoCall: noOp,
   endVideoCall: noOp,
+  toggleAudio: noOp,
+  toggleVideo: noOp,
+  audioEnabled: false,
+  videoEnabled: false,
+  selfStreamUnstable: true,
   peerStream: undefined,
 });
 
