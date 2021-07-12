@@ -1,26 +1,19 @@
 import { createContext } from 'react';
-import useDataChannel from '../hooks/use-data-channel';
 
-type DataChannel = ReturnType<typeof useDataChannel>;
+type DataChannel = {
+  sendTextMessage: (text: string) => void;
+  sendReadReceipt: (messageId: string, readDate: string) => void;
+  connectToPeer: (id: string) => void;
+  startVideoCall: () => void;
+  endVideoCall: () => void;
+  toggleAudio: () => void;
+  toggleVideo: () => void;
+  selfStreamUnstable: boolean;
+  audioEnabled: boolean;
+  videoEnabled: boolean;
+  peerStream: MediaStream | undefined;
+};
 
-function noOp() {
-  if (process.env.NODE_ENV !== 'production') {
-    console.error('No-op function called.');
-  }
-}
-
-const DataChannelContext = createContext<DataChannel>({
-  connectToPeer: noOp,
-  sendReadReceipt: noOp,
-  sendTextMessage: noOp,
-  startVideoCall: noOp,
-  endVideoCall: noOp,
-  toggleAudio: noOp,
-  toggleVideo: noOp,
-  audioEnabled: false,
-  videoEnabled: false,
-  selfStreamUnstable: true,
-  peerStream: undefined,
-});
-
-export default DataChannelContext;
+export const DataChannelContext = createContext<DataChannel | undefined>(
+  undefined,
+);

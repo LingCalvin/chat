@@ -10,7 +10,8 @@ import { UIDReset } from 'react-uid';
 import { store } from '../app/store';
 import theme from '../common/constants/theme';
 import useRemoveServerSideCSS from '../common/hooks/use-remove-server-side-css';
-import DataChannelProvider from '../features/data-channel/components/data-channel.provider';
+import { DataChannelProvider } from '../features/data-channel/providers/data-channel.provider';
+import { SignalingServerConnectionProvider } from '../features/data-channel/providers/signaling-server-connection.provider';
 import PersistanceLoader from '../features/perisistance/components/peristance-loader';
 import '../styles/globals.css';
 
@@ -20,17 +21,19 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
       <PersistanceLoader />
-      <DataChannelProvider>
-        <Head>
-          <title>Chat</title>
-        </Head>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <UIDReset prefix="uid">
-            <Component {...pageProps} />
-          </UIDReset>
-        </ThemeProvider>
-      </DataChannelProvider>
+      <SignalingServerConnectionProvider>
+        <DataChannelProvider>
+          <Head>
+            <title>Chat</title>
+          </Head>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <UIDReset prefix="uid">
+              <Component {...pageProps} />
+            </UIDReset>
+          </ThemeProvider>
+        </DataChannelProvider>
+      </SignalingServerConnectionProvider>
     </Provider>
   );
 }

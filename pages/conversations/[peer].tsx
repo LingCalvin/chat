@@ -14,7 +14,6 @@ import { useRouter } from 'next/router';
 import {
   ChangeEventHandler,
   FormEventHandler,
-  useContext,
   useEffect,
   useState,
 } from 'react';
@@ -23,7 +22,7 @@ import TextField from '../../common/components/text-field';
 import useMenu from '../../common/hooks/use-menu';
 import ChatBubble from '../../features/conversation/components/chat-bubble';
 import VideoCall from '../../features/conversation/components/video-call';
-import DataChannelContext from '../../features/data-channel/contexts/data-channel.context';
+import { useDataChannel } from '../../features/data-channel/hooks/use-data-channel';
 import useStyles from '../../styles/conversation.styles';
 
 export type Inputs = {
@@ -46,7 +45,7 @@ export default function Conversation() {
     toggleVideo,
     audioEnabled,
     videoEnabled,
-  } = useContext(DataChannelContext);
+  } = useDataChannel();
   const auth = useAppSelector((state) => state.auth);
   const conversation = useAppSelector((state) => state.conversation);
   const roomName = useAppSelector((state) =>
