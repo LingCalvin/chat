@@ -10,9 +10,10 @@ import { UIDReset } from 'react-uid';
 import { store } from '../app/store';
 import theme from '../common/constants/theme';
 import useRemoveServerSideCSS from '../common/hooks/use-remove-server-side-css';
+import ConversationLogger from '../features/conversation/components/conversation-logger';
 import { DataChannelProvider } from '../features/data-channel/providers/data-channel.provider';
-import { SignalingServerConnectionProvider } from '../features/data-channel/providers/signaling-server-connection.provider';
 import PersistanceLoader from '../features/perisistance/components/peristance-loader';
+import { SignalingServerConnectionProvider } from '../features/signaling/providers/signaling-server-connection.provider';
 import '../styles/globals.css';
 
 function App({ Component, pageProps }: AppProps) {
@@ -23,6 +24,7 @@ function App({ Component, pageProps }: AppProps) {
       <PersistanceLoader />
       <SignalingServerConnectionProvider>
         <DataChannelProvider>
+          <ConversationLogger />
           <Head>
             <title>Chat</title>
           </Head>

@@ -22,6 +22,7 @@ import TextField from '../../common/components/text-field';
 import useMenu from '../../common/hooks/use-menu';
 import ChatBubble from '../../features/conversation/components/chat-bubble';
 import VideoCall from '../../features/conversation/components/video-call';
+import useConversation from '../../features/conversation/hooks/use-conversation';
 import { useDataChannel } from '../../features/data-channel/hooks/use-data-channel';
 import useStyles from '../../styles/conversation.styles';
 
@@ -35,7 +36,6 @@ export default function Conversation() {
   const { query } = router;
 
   const {
-    sendTextMessage,
     connectToPeer,
     peerStream,
     selfStreamUnstable,
@@ -46,6 +46,8 @@ export default function Conversation() {
     audioEnabled,
     videoEnabled,
   } = useDataChannel();
+
+  const { sendTextMessage } = useConversation();
   const auth = useAppSelector((state) => state.auth);
   const conversation = useAppSelector((state) => state.conversation);
   const roomName = useAppSelector((state) =>
@@ -133,7 +135,7 @@ export default function Conversation() {
       <Container className={classes.content}>
         <div className={classes.messageBox}>
           {conversation.messages.map((message) => {
-            const isSelf = message.sender === auth.id;
+            const isSelf = message.senderId === auth.id;
             return (
               <ChatBubble
                 key={message.id}

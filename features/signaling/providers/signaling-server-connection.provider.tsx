@@ -2,9 +2,9 @@ import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import useWebSocket, { Options, ReadyState } from 'react-use-websocket';
 import { useAppDispatch } from '../../../app/hooks';
 import useTicket from '../../auth/hooks/use-ticket';
+import { setSignalingServerReadyState } from '../../data-channel/data-channel.slice';
 import { pingDelay } from '../constants/ping';
 import { SignalingServerConnectionContext } from '../contexts/signaling-server-connection.context';
-import { setSignalingServerReadyState } from '../data-channel.slice';
 import { WebSocketRequest } from '../types/web-socket-request';
 import { generateWebSocketUrl } from '../utils/web-socket.utils';
 
