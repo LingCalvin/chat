@@ -1,12 +1,25 @@
 import { createContext } from 'react';
-import useDataChannel from '../hooks/use-data-channel';
+import useStreamWrapper from '../hooks/use-stream-wrapper';
+import { DataChannelEvent } from '../interfaces/data-channel-events';
+import {
+  DataChannelMessage,
+  MessageType,
+} from '../interfaces/data-channel-messages';
 
-type DataChannel = ReturnType<typeof useDataChannel>;
+export type Listener = (event: DataChannelEvent) => void;
 
-const DataChannelContext = createContext<DataChannel>({
-  connectToPeer: () => {},
-  sendReadReceipt: () => {},
-  sendTextMessage: () => {},
-});
+type DataChannel = {
+  connectToPeer: (id: string) => void;
+  addEventListener: (type: MessageType, listener: Listener) => void;
+  removeEventListener: (type: MessageType, listener: Listener) => void;
+  sendMessage: (message: DataChannelMessage) => void;
+  peerStream: MediaStream | undefined;
+  selfStream: ReturnType<typeof useStreamWrapper>;
+  addStream: (stream: MediaStream) => void;
+  removeStream: (stream: MediaStream) => void;
+  clearPeerStream: () => void;
+};
 
-export default DataChannelContext;
+export const DataChannelContext = createContext<DataChannel | undefined>(
+  undefined,
+);

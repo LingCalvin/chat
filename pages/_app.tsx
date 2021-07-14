@@ -5,14 +5,18 @@ import '@fontsource/roboto/700.css';
 import { CssBaseline, ThemeProvider } from '@material-ui/core';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import React from 'react';
 import { Provider } from 'react-redux';
 import { UIDReset } from 'react-uid';
 import { store } from '../app/store';
+import { theme } from '../common/constants/theme';
 import useRemoveServerSideCSS from '../common/hooks/use-remove-server-side-css';
-import DataChannelProvider from '../features/data-channel/components/data-channel.provider';
+import ConversationLogger from '../features/conversation/components/conversation-logger';
+import DataChannelProvider from '../features/data-channel/providers/data-channel.provider';
 import PersistanceLoader from '../features/perisistance/components/peristance-loader';
+import { SignalingServerConnectionProvider } from '../features/signaling/providers/signaling-server-connection.provider';
+import VideoCallSwitcher from '../features/video-call/components/video-call-switcher';
 import '../styles/globals.css';
-import theme from '../theme';
 
 function App({ Component, pageProps }: AppProps) {
   useRemoveServerSideCSS();
@@ -20,17 +24,23 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
       <PersistanceLoader />
-      <DataChannelProvider>
-        <Head>
-          <title>Chat</title>
-        </Head>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <UIDReset prefix="uid">
-            <Component {...pageProps} />
-          </UIDReset>
-        </ThemeProvider>
-      </DataChannelProvider>
+      <SignalingServerConnectionProvider>
+        <DataChannelProvider>
+          <ConversationLogger />
+          <Head>
+            <title>Chat</title>
+          </Head>
+
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <UIDReset prefix="uid">
+              <VideoCallSwitcher>
+                <Component {...pageProps} />
+              </VideoCallSwitcher>
+            </UIDReset>
+          </ThemeProvider>
+        </DataChannelProvider>
+      </SignalingServerConnectionProvider>
     </Provider>
   );
 }

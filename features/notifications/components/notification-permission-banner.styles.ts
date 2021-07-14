@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   root: {
     borderRadius: 0,
     position: 'absolute',
@@ -10,6 +10,6 @@ const useStyles = makeStyles((theme) => ({
   actionBox: {
     justifyContent: 'flex-end',
   },
-}));
+});
 
 export default useStyles;

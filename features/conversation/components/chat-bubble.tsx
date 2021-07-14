@@ -56,7 +56,7 @@ export default function ChatBubble({
         focusVisibleClassName={classes.focusedChatBubble}
         onClick={toggle}
       >
-        <Typography className={classes.text}>{message.payload}</Typography>
+        <Typography className={classes.text}>{message.body}</Typography>
       </ButtonBase>
       <Collapse className={classes.infoBox} in={toggleState}>
         <Typography variant="caption">{getInfoBoxText()}</Typography>

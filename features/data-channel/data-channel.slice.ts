@@ -2,35 +2,26 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ReadyState } from 'react-use-websocket';
 
 interface DataChannelState {
-  connectedToSignalingServer: boolean;
-  webSocketReadyState: ReadyState;
+  signalingServerReadyState: ReadyState;
 }
 
 const initialState: DataChannelState = {
-  connectedToSignalingServer: false,
-  webSocketReadyState: ReadyState.UNINSTANTIATED,
+  signalingServerReadyState: ReadyState.UNINSTANTIATED,
 };
 
 export const dataChannelSlice = createSlice({
   name: 'dataChannel',
   initialState,
   reducers: {
-    setConnectedToSignalingServer: (
+    setSignalingServerReadyState: (
       state,
-      action: PayloadAction<DataChannelState['connectedToSignalingServer']>,
+      action: PayloadAction<DataChannelState['signalingServerReadyState']>,
     ) => {
-      state.connectedToSignalingServer = action.payload;
-    },
-    setWebSocketReadyState: (
-      state,
-      action: PayloadAction<DataChannelState['webSocketReadyState']>,
-    ) => {
-      state.webSocketReadyState = action.payload;
+      state.signalingServerReadyState = action.payload;
     },
   },
 });
 
-export const { setConnectedToSignalingServer, setWebSocketReadyState } =
-  dataChannelSlice.actions;
+export const { setSignalingServerReadyState } = dataChannelSlice.actions;
 const dataChannelReducer = dataChannelSlice.reducer;
 export default dataChannelReducer;

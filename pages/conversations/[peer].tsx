@@ -3,17 +3,27 @@ import {
   Container,
   IconButton,
   InputAdornment,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from '@material-ui/core';
-import { Send } from '@material-ui/icons';
+import { MoreVert, Send, VideoCall as VideoCallIcon } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
+import {
+  ChangeEventHandler,
+  FormEventHandler,
+  useEffect,
+  useState,
+} from 'react';
 import { useAppSelector } from '../../app/hooks';
 import TextField from '../../common/components/text-field';
+import useMenu from '../../common/hooks/use-menu';
 import ChatBubble from '../../features/conversation/components/chat-bubble';
-import DataChannelContext from '../../features/data-channel/contexts/data-channel.context';
+import useConversation from '../../features/conversation/hooks/use-conversation';
+import { useDataChannel } from '../../features/data-channel/hooks/use-data-channel';
+import { useVideoCall } from '../../features/video-call/hooks/use-video-call';
 import useStyles from '../../styles/conversation.styles';
 
 export type Inputs = {
@@ -22,9 +32,13 @@ export type Inputs = {
 
 export default function Conversation() {
   const classes = useStyles();
-  const { query } = useRouter();
+  const router = useRouter();
+  const { query } = router;
 
-  const { sendTextMessage, connectToPeer } = useContext(DataChannelContext);
+  const { connectToPeer } = useDataChannel();
+  const { startVideoCall } = useVideoCall();
+
+  const { sendTextMessage } = useConversation();
   const auth = useAppSelector((state) => state.auth);
   const conversation = useAppSelector((state) => state.conversation);
   const roomName = useAppSelector((state) =>
@@ -34,14 +48,19 @@ export default function Conversation() {
   )?.username;
 
   useEffect(() => {
-    if (conversation.initiate) {
+    if (conversation.initiate && conversation.connectionStatus === 'initial') {
       connectToPeer(query.peer as string);
     }
-  }, [connectToPeer, conversation.initiate, query.peer]);
+  }, [
+    connectToPeer,
+    conversation.connectionStatus,
+    conversation.initiate,
+    query.peer,
+  ]);
 
   const [messageInput, setMessageInput] = useState('');
 
-  const handleMessageInputChange: React.ChangeEventHandler<
+  const handleMessageInputChange: ChangeEventHandler<
     HTMLTextAreaElement | HTMLInputElement
   > = (e) => {
     e.preventDefault();
@@ -51,7 +70,7 @@ export default function Conversation() {
   const canSendMessage =
     messageInput.length > 0 && conversation.connectionStatus === 'connected';
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (canSendMessage) {
       sendTextMessage(messageInput);
@@ -64,6 +83,8 @@ export default function Conversation() {
     window.scrollBy(0, document.body.scrollHeight);
   }, [conversation.messages.length]);
 
+  const menu = useMenu();
+
   if (auth.status !== 'authenticated') {
     return null;
   }
@@ -75,13 +96,35 @@ export default function Conversation() {
           <Typography noWrap variant="h4" component="h1">
             {roomName}
           </Typography>
+          <div className={classes.spacer} />
+          <IconButton
+            aria-label="video call"
+            color="inherit"
+            onClick={() => {
+              if (!conversation.otherParticipant) {
+                throw new Error(
+                  'Cannot start a video call with an peer whose ID is unknown.',
+                );
+              }
+              startVideoCall(conversation.otherParticipant);
+            }}
+            disabled={conversation.connectionStatus !== 'connected'}
+          >
+            <VideoCallIcon />
+          </IconButton>
+          <IconButton aria-label="menu" edge="end" onClick={menu.handleClick}>
+            <MoreVert />
+          </IconButton>
         </Toolbar>
+        <Menu anchorEl={menu.anchorEl} open={menu.open} onClose={menu.onClose}>
+          <MenuItem onClick={() => router.push('/settings')}>Settings</MenuItem>
+        </Menu>
       </AppBar>
       <Toolbar />
       <Container className={classes.content}>
         <div className={classes.messageBox}>
           {conversation.messages.map((message) => {
-            const isSelf = message.sender === auth.id;
+            const isSelf = message.senderId === auth.id;
             return (
               <ChatBubble
                 key={message.id}

@@ -1,6 +1,6 @@
-import { createMuiTheme } from '@material-ui/core';
+import { createMuiTheme, ThemeOptions } from '@material-ui/core';
 
-const theme = createMuiTheme({
+const baseOptions: ThemeOptions = {
   palette: { error: { light: '#E94948', main: '#B00020', dark: '#790000' } },
   typography: {
     h1: { fontSize: '3.75rem' },
@@ -10,6 +10,10 @@ const theme = createMuiTheme({
     h5: { fontSize: '1.25rem' },
     h6: { fontSize: '1.2rem' },
   },
-});
+};
 
-export default theme;
+export const theme = createMuiTheme(baseOptions);
+export const darkTheme = createMuiTheme({
+  ...baseOptions,
+  palette: { ...baseOptions.palette, type: 'dark' },
+});

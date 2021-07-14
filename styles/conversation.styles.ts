@@ -52,6 +52,9 @@ const useStyles = makeStyles((theme) => {
       textAlign: 'right',
       marginLeft: 'auto',
     },
+    spacer: {
+      flexGrow: 1,
+    },
   };
 });
 

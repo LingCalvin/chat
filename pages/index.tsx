@@ -39,7 +39,7 @@ export default function Home() {
     (state) => state.conversation.otherParticipant,
   );
   const connectionStatus = useAppSelector(
-    (state) => state.dataChannel.webSocketReadyState,
+    (state) => state.dataChannel.signalingServerReadyState,
   );
 
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);

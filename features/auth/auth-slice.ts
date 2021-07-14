@@ -7,6 +7,7 @@ interface InitialAuthState {
 
 interface AuthenticatedAuthState {
   status: 'authenticated';
+  ticket: string | undefined;
   id: string;
   username: string;
 }
@@ -24,14 +25,21 @@ export const authSlice = createSlice({
         status: 'authenticated',
         id: action.payload.id,
         username: action.payload.username,
+        ticket: undefined,
       };
     },
     clearAuthentication: (_state) => {
       return { status: 'unauthenticated' };
     },
+    setTicket: (state, action: PayloadAction<string | undefined>) => {
+      if (state.status === 'authenticated') {
+        state.ticket = action.payload;
+      }
+    },
   },
 });
 
-export const { setAuthentication, clearAuthentication } = authSlice.actions;
+export const { setAuthentication, clearAuthentication, setTicket } =
+  authSlice.actions;
 const authReducer = authSlice.reducer;
 export default authReducer;
