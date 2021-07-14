@@ -21,9 +21,9 @@ import { useAppSelector } from '../../app/hooks';
 import TextField from '../../common/components/text-field';
 import useMenu from '../../common/hooks/use-menu';
 import ChatBubble from '../../features/conversation/components/chat-bubble';
-import VideoCall from '../../features/conversation/components/video-call';
 import useConversation from '../../features/conversation/hooks/use-conversation';
 import { useDataChannel } from '../../features/data-channel/hooks/use-data-channel';
+import { useVideoCall } from '../../features/video-call/hooks/use-video-call';
 import useStyles from '../../styles/conversation.styles';
 
 export type Inputs = {
@@ -35,17 +35,8 @@ export default function Conversation() {
   const router = useRouter();
   const { query } = router;
 
-  const {
-    connectToPeer,
-    peerStream,
-    selfStreamUnstable,
-    startVideoCall,
-    endVideoCall,
-    toggleAudio,
-    toggleVideo,
-    audioEnabled,
-    videoEnabled,
-  } = useDataChannel();
+  const { connectToPeer } = useDataChannel();
+  const { startVideoCall } = useVideoCall();
 
   const { sendTextMessage } = useConversation();
   const auth = useAppSelector((state) => state.auth);
@@ -57,10 +48,15 @@ export default function Conversation() {
   )?.username;
 
   useEffect(() => {
-    if (conversation.initiate) {
+    if (conversation.initiate && conversation.connectionStatus === 'initial') {
       connectToPeer(query.peer as string);
     }
-  }, [connectToPeer, conversation.initiate, query.peer]);
+  }, [
+    connectToPeer,
+    conversation.connectionStatus,
+    conversation.initiate,
+    query.peer,
+  ]);
 
   const [messageInput, setMessageInput] = useState('');
 
@@ -93,20 +89,6 @@ export default function Conversation() {
     return null;
   }
 
-  if (peerStream) {
-    return (
-      <VideoCall
-        stream={peerStream}
-        micEnabled={audioEnabled}
-        videoEnabled={videoEnabled}
-        onToggleMic={toggleAudio}
-        onToggleVideo={toggleVideo}
-        onEndCall={endVideoCall}
-        selfStreamUnstable={selfStreamUnstable}
-      />
-    );
-  }
-
   return (
     <div className={classes.root}>
       <AppBar className={classes.appBar} color="inherit" position="fixed">
@@ -118,7 +100,14 @@ export default function Conversation() {
           <IconButton
             aria-label="video call"
             color="inherit"
-            onClick={startVideoCall}
+            onClick={() => {
+              if (!conversation.otherParticipant) {
+                throw new Error(
+                  'Cannot start a video call with an peer whose ID is unknown.',
+                );
+              }
+              startVideoCall(conversation.otherParticipant);
+            }}
             disabled={conversation.connectionStatus !== 'connected'}
           >
             <VideoCallIcon />

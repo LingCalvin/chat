@@ -4,7 +4,7 @@ import VideoCallControls from './video-call-controls';
 import useStyles from './video-call.styles';
 
 interface VideoCallProps {
-  stream: MediaStream;
+  stream: MediaStream | undefined;
   micEnabled: boolean;
   videoEnabled: boolean;
   selfStreamUnstable?: boolean;

@@ -6,10 +6,9 @@ import {
   ReadReceiptMessage,
   TextMessage,
   VideoCallAcceptMessage,
+  VideoCallDeclineMessage,
   VideoCallInitiateMessage,
   VideoCallLeaveMessage,
-  VideoCallRejectMessage,
-  VideoCallRescindMessage,
 } from '../interfaces/data-channel-messages';
 
 /**
@@ -64,6 +63,12 @@ export function videoCallAcceptMessage(
   return message(MessageType.VideoCallAccept, { messageId });
 }
 
+export function videoCallDeclineMessage(
+  messageId: string,
+): VideoCallDeclineMessage {
+  return message(MessageType.VideoCallDecline, { messageId });
+}
+
 export function videoCallInitiateMessage(): VideoCallInitiateMessage {
   const base = baseMessage();
   const timestamp = new Date(base.timestamp);
@@ -79,16 +84,4 @@ export function videoCallLeaveMessage(
   messageId: string,
 ): VideoCallLeaveMessage {
   return message(MessageType.VideoCallLeave, { messageId });
-}
-
-export function videoCallRejectMessage(
-  messageId: string,
-): VideoCallRejectMessage {
-  return message(MessageType.VideoCallReject, { messageId });
-}
-
-export function videoCallRescindMessage(
-  messageId: string,
-): VideoCallRescindMessage {
-  return message(MessageType.VideoCallRescind, { messageId });
 }

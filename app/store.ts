@@ -5,6 +5,7 @@ import contactsReducer from '../features/contacts/contacts.slice';
 import conversationReducer from '../features/conversation/conversation-slice';
 import dataChannelReducer from '../features/data-channel/data-channel.slice';
 import settingsReducer from '../features/settings/settings.slice';
+import videoCallReducer from '../features/video-call/video-call.slice';
 import { authApi } from './services/auth';
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
     conversation: conversationReducer,
     dataChannel: dataChannelReducer,
     settings: settingsReducer,
+    videoCall: videoCallReducer,
     [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

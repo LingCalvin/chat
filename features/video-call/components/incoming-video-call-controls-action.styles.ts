@@ -1,9 +1,10 @@
 import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
-  root: { display: 'flex', gap: theme.spacing(2) },
-  iconButton: {
-    boxShadow: 'unset',
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(1),
   },
 }));
 

@@ -32,7 +32,7 @@ export default function VideoCallControls({
       <Fab className={classes.iconButton} size="medium" onClick={onMicToggle}>
         {micOn ? <Mic /> : <MicOff />}
       </Fab>
-      <Fab color="secondary" onClick={onHangUp}>
+      <Fab className={classes.hangUpIcon} onClick={onHangUp}>
         <CallEnd />
       </Fab>
       <Fab className={classes.iconButton} size="medium" onClick={onVideoToggle}>

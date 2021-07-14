@@ -7,7 +7,6 @@ const useStyles = makeStyles((theme) => ({
     gridTemplateAreas: `"main"
     "self"
     "controls"`,
-    backgroundColor: 'black',
     height: '100%',
     gap: theme.spacing(3),
   },
@@ -31,11 +30,6 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '100%',
     maxWidth: '100%',
     objectFit: 'contain',
-  },
-  selfVideoContainer: {
-    gridArea: 'self',
-    maxHeight: '100%',
-    maxWidth: '33%',
   },
   snackBar: {
     bottom: 90,

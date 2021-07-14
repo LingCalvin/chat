@@ -8,7 +8,6 @@ import {
 } from 'react';
 import SimplePeer from 'simple-peer';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import useSyncedRef from '../../../common/hooks/use-synced-ref';
 import { addContact } from '../../contacts/contacts.slice';
 import {
   setConnectionStatus,
@@ -27,13 +26,14 @@ import {
   MessageType,
 } from '../interfaces/data-channel-messages';
 import { dataChannelEvent } from '../utils/data-channel-event.utils';
-import { videoCallLeaveMessage } from '../utils/data-channel-message.utils';
 
 export interface DataChannelProviderProps {
   children?: ReactNode;
 }
 
-export function DataChannelProvider({ children }: DataChannelProviderProps) {
+export default function DataChannelProvider({
+  children,
+}: DataChannelProviderProps) {
   const id = useAppSelector((state) =>
     state.auth.status === 'authenticated' ? state.auth.id : null,
   );
@@ -42,9 +42,6 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
   const dispatch = useAppDispatch();
 
   const selfStreamWrapper = useStreamWrapper();
-  const { stream: selfStream, setStream: setSelfStream } = selfStreamWrapper;
-  const selfStreamRef = useSyncedRef(selfStream);
-
   const { stream: peerStream, setStream: setPeerStream } = useStreamWrapper();
 
   const activeContact = useMemo(() => {
@@ -58,10 +55,9 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
     [MessageType.ReadReceipt]: new Set(),
     [MessageType.Text]: new Set(),
     [MessageType.VideoCallAccept]: new Set(),
+    [MessageType.VideoCallDecline]: new Set(),
     [MessageType.VideoCallInitiate]: new Set(),
     [MessageType.VideoCallLeave]: new Set(),
-    [MessageType.VideoCallReject]: new Set(),
-    [MessageType.VideoCallRescind]: new Set(),
   });
 
   const addEventListener = useCallback(
@@ -83,11 +79,23 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
   const sendDataChannelMessage = useCallback(
     (message: DataChannelMessage) => {
       peer?.send(JSON.stringify(message));
-      eventListeners.current[message.type].forEach((listener) =>
-        listener(dataChannelEvent(message, id ?? 'UNKNOWN')),
-      );
+      eventListeners.current[message.type].forEach((listener) => {
+        if (!id) {
+          console.warn(
+            `DataChannelMessage sender ID is unknown. Correct value should be authenticated client's ID`,
+            `Current ID: ${id}`,
+            message,
+          );
+        }
+        if (!activeContact?.id) {
+          throw new Error(
+            'Cannot send message to recipient with an undefined ID.',
+          );
+        }
+        listener(dataChannelEvent(message, activeContact.id, id ?? 'UNKNOWN'));
+      });
     },
-    [id, peer],
+    [activeContact?.id, id, peer],
   );
 
   // Cleanup and close the connection
@@ -153,16 +161,6 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
     [sendSignalingServerMessage],
   );
 
-  const initializeMediaStream = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    setSelfStream(stream);
-    peer?.addStream(stream);
-    return stream;
-  }, [peer, setSelfStream]);
-
   useEffect(() => {
     // Send signal data to peer when available
     const handleSignal = (data: unknown) => {
@@ -173,17 +171,17 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
     // Handle data being sent along the channel
     const handleData = (data: string) => {
       const message: DataChannelMessage = JSON.parse(data);
-      eventListeners.current[message.type].forEach((listener) =>
-        listener(dataChannelEvent(message, activeContact?.id ?? 'UNKNOWN')),
-      );
-      if (message.type === MessageType.VideoCallLeave) {
-        if (selfStream) {
-          selfStream.getTracks().forEach((track) => track.stop());
-          peer?.removeStream(selfStream);
+      eventListeners.current[message.type].forEach((listener) => {
+        if (!activeContact?.id) {
+          console.warn('DataChannelMessage sender is unknown.', message);
         }
-        setSelfStream(undefined);
-        setPeerStream(undefined);
-      }
+        const event = dataChannelEvent(
+          message,
+          id ?? 'UNKNOWN',
+          activeContact?.id ?? 'UNKNOWN',
+        );
+        listener(event);
+      });
     };
     const handleConnect = () => {
       dispatch(setConnectionStatus('connected'));
@@ -197,9 +195,6 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
     };
     const handleStream = (stream: MediaStream) => {
       setPeerStream(stream);
-      if (!selfStreamRef.current) {
-        initializeMediaStream();
-      }
     };
     peer?.on('signal', handleSignal);
     peer?.on('data', handleData);
@@ -219,12 +214,9 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
     activeContact?.id,
     conversation.otherParticipant,
     dispatch,
-    initializeMediaStream,
+    id,
     peer,
-    selfStream,
-    selfStreamRef,
     setPeerStream,
-    setSelfStream,
     signal,
   ]);
 
@@ -233,48 +225,46 @@ export function DataChannelProvider({ children }: DataChannelProviderProps) {
     [preSignal],
   );
 
-  const startVideoCall = useCallback(() => {
-    initializeMediaStream().catch(console.error);
-  }, [initializeMediaStream]);
+  const addStream = useCallback(
+    (stream: MediaStream) => {
+      peer?.addStream(stream);
+    },
+    [peer],
+  );
 
-  const endVideoCall = useCallback(() => {
-    sendDataChannelMessage(videoCallLeaveMessage('UNKNOWN'));
-    if (selfStream) {
-      selfStream.getTracks().forEach((track) => track.stop());
-      peer?.removeStream(selfStream);
-    }
-    setSelfStream(undefined);
+  const removeStream = useCallback(
+    (stream: MediaStream) => {
+      peer?.removeStream(stream);
+    },
+    [peer],
+  );
+
+  const clearPeerStream = useCallback(() => {
     setPeerStream(undefined);
-  }, [peer, selfStream, sendDataChannelMessage, setPeerStream, setSelfStream]);
+  }, [setPeerStream]);
 
   const value = useMemo(
     () => ({
       connectToPeer,
-      startVideoCall,
-      endVideoCall,
-      toggleAudio: selfStreamWrapper.toggleAudio,
-      toggleVideo: selfStreamWrapper.toggleVideo,
-      selfStreamUnstable: selfStreamWrapper.unstable,
-      audioEnabled: selfStreamWrapper.audioEnabled,
-      videoEnabled: selfStreamWrapper.videoEnabled,
       peerStream,
+      selfStream: selfStreamWrapper,
       addEventListener,
       removeEventListener,
       sendMessage: sendDataChannelMessage,
+      addStream,
+      removeStream,
+      clearPeerStream,
     }),
     [
-      addEventListener,
       connectToPeer,
-      endVideoCall,
       peerStream,
+      selfStreamWrapper,
+      addEventListener,
       removeEventListener,
-      selfStreamWrapper.audioEnabled,
-      selfStreamWrapper.toggleAudio,
-      selfStreamWrapper.toggleVideo,
-      selfStreamWrapper.unstable,
-      selfStreamWrapper.videoEnabled,
       sendDataChannelMessage,
-      startVideoCall,
+      addStream,
+      removeStream,
+      clearPeerStream,
     ],
   );
 
