@@ -1,26 +1,23 @@
 import { makeStyles } from '@material-ui/core';
-import { green, red } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme) => {
-  const acceptColor = theme.palette.augmentColor(green, 600);
-  const rejectColor = theme.palette.augmentColor(red);
   return {
     root: { display: 'flex', gap: theme.spacing(2) },
     iconButton: {
       boxShadow: 'unset',
     },
     acceptIcon: {
-      backgroundColor: acceptColor.main,
-      color: acceptColor.contrastText,
+      backgroundColor: theme.palette.accept.main,
+      color: theme.palette.accept.contrastText,
       '&:hover': {
-        backgroundColor: acceptColor.dark,
+        backgroundColor: theme.palette.accept.dark,
       },
     },
-    rejectIcon: {
-      backgroundColor: rejectColor.main,
-      color: rejectColor.contrastText,
+    declineIcon: {
+      backgroundColor: theme.palette.decline.main,
+      color: theme.palette.decline.contrastText,
       '&:hover': {
-        backgroundColor: rejectColor.dark,
+        backgroundColor: theme.palette.decline.dark,
       },
     },
   };
