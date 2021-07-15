@@ -1,7 +1,9 @@
+import { ThemeOptions } from '@material-ui/core';
 import { createTheme } from '../utils/create-theme';
 
-const baseOptions = {
+const baseOptions: ThemeOptions = {
   palette: {
+    background: { default: '#FFFFFF' },
     error: { light: '#E94948', main: '#B00020', dark: '#790000' },
   },
   typography: {
@@ -17,5 +19,9 @@ const baseOptions = {
 export const theme = createTheme(baseOptions);
 export const darkTheme = createTheme({
   ...baseOptions,
-  palette: { ...baseOptions.palette, type: 'dark' },
+  palette: {
+    ...baseOptions.palette,
+    type: 'dark',
+    background: { default: '#121212' },
+  },
 });
