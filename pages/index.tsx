@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { ReadyState } from 'react-use-websocket';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import ConnectForm from '../features/conversation/components/connect-form';
+import MessageEditor from '../features/conversation/components/message-editor';
 import { setParticipant } from '../features/conversation/conversation-slice';
 import useStyles from '../styles/index.styles';
 
@@ -112,6 +113,7 @@ export default function Home() {
       />
     </>
   );
+  return <MessageEditor />;
   return (
     <>
       {authState.status === 'authenticated' && <PermissionBanner />}
