@@ -5,6 +5,7 @@ import {
   CardContent,
   Typography,
 } from '@material-ui/core';
+import clsx from 'clsx';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
@@ -13,7 +14,13 @@ import {
 } from '../../settings/settings.slice';
 import useStyles from './notification-permission-banner.styles';
 
-export default function NotificationPermissionBanner() {
+export interface NotificationPermissionBannerProps {
+  className?: string;
+}
+
+export default function NotificationPermissionBanner({
+  className,
+}: NotificationPermissionBannerProps) {
   const classes = useStyles();
 
   const dispatch = useAppDispatch();
@@ -40,7 +47,7 @@ export default function NotificationPermissionBanner() {
     notificationSettings.enabled
   ) {
     return (
-      <Card className={classes.root}>
+      <Card className={clsx(classes.root, className)}>
         <CardContent>
           <Typography>
             Enable notifications to get alerted about new messages.

@@ -62,7 +62,7 @@ export default function Settings() {
 
   return (
     <div>
-      <AppBar color="transparent" elevation={0}>
+      <AppBar>
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={router.back}>
             <ArrowBack />

@@ -16,9 +16,15 @@ export function createTheme(options: ThemeOptions): Theme {
   return createMuiTheme({
     ...options,
     palette: {
-      accept: theme.palette.augmentColor(theme.palette.accept),
-      decline: theme.palette.augmentColor(theme.palette.decline),
       ...options.palette,
+      accept: {
+        ...theme.palette.augmentColor(theme.palette.accept),
+        ...theme.palette.accept,
+      },
+      decline: {
+        ...theme.palette.augmentColor(theme.palette.decline),
+        ...theme.palette.decline,
+      },
     },
   });
 }

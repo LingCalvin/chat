@@ -12,6 +12,9 @@ const useStyles = makeStyles((theme) => {
     appBar: {
       minWidth: 0,
     },
+    avatar: {
+      alignSelf: 'flex-end',
+    },
     chatBubble,
     content: {
       display: 'flex',
@@ -46,6 +49,10 @@ const useStyles = makeStyles((theme) => {
       ...chatBubble,
       textAlign: 'left',
       marginRight: 'auto',
+    },
+    receivedChatBubbleContainer: {
+      display: 'flex',
+      gap: theme.spacing(1),
     },
     sentChatBubble: {
       ...chatBubble,
