@@ -6,29 +6,36 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     gap: theme.spacing(1),
   },
-  content: {
-    margin: 'auto',
-    width: '100%',
-    maxWidth: '80ch',
-  },
   idContainer: {
     textAlign: 'center',
   },
-  overflowMenuButton: {
-    marginLeft: 'auto',
+  header: {
+    flexGrow: 1,
   },
   root: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  banner: {
+    gridArea: 'banner',
+  },
+  content: {
+    flexGrow: 1,
+    display: 'grid',
+    gridTemplateRows: 'auto 1fr',
+    gridTemplateAreas: `
+    "banner"
+    "connection-box"`,
     gap: theme.spacing(1),
   },
-  unauthenticatedView: {
+  connectionBox: {
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(1),
+    gridArea: 'connection-box',
+    textAlign: 'center',
+    alignSelf: 'center',
   },
 }));
 

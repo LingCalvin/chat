@@ -1,5 +1,6 @@
 import {
   AppBar,
+  Avatar,
   Container,
   IconButton,
   InputAdornment,
@@ -91,7 +92,7 @@ export default function Conversation() {
 
   return (
     <div className={classes.root}>
-      <AppBar className={classes.appBar} color="inherit" position="fixed">
+      <AppBar className={classes.appBar} position="fixed">
         <Toolbar>
           <Typography noWrap variant="h4" component="h1">
             {roomName}
@@ -112,7 +113,12 @@ export default function Conversation() {
           >
             <VideoCallIcon />
           </IconButton>
-          <IconButton aria-label="menu" edge="end" onClick={menu.handleClick}>
+          <IconButton
+            aria-label="menu"
+            edge="end"
+            color="inherit"
+            onClick={menu.handleClick}
+          >
             <MoreVert />
           </IconButton>
         </Toolbar>
@@ -125,15 +131,28 @@ export default function Conversation() {
         <div className={classes.messageBox}>
           {conversation.messages.map((message) => {
             const isSelf = message.senderId === auth.id;
+            if (isSelf) {
+              return (
+                <ChatBubble
+                  key={message.id}
+                  className={classes.sentChatBubble}
+                  sent={isSelf}
+                  message={message}
+                />
+              );
+            }
             return (
-              <ChatBubble
+              <div
                 key={message.id}
-                className={
-                  isSelf ? classes.sentChatBubble : classes.receivedChatBubble
-                }
-                sent={isSelf}
-                message={message}
-              />
+                className={classes.receivedChatBubbleContainer}
+              >
+                {!isSelf && <Avatar className={classes.avatar} />}
+                <ChatBubble
+                  className={classes.receivedChatBubble}
+                  sent={isSelf}
+                  message={message}
+                />
+              </div>
             );
           })}
         </div>

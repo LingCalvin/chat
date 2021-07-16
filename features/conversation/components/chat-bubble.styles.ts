@@ -16,10 +16,6 @@ const useStyles = makeStyles((theme) => {
   };
   return {
     chatBubble,
-    focusedChatBubble: {
-      filter: 'brightness(90%)',
-      backgroundColor: 'yellow',
-    },
     infoBox: {
       paddingLeft: theme.spacing(1),
       paddingRight: theme.spacing(1),

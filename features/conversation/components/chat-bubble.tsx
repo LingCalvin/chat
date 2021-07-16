@@ -53,7 +53,6 @@ export default function ChatBubble({
           [classes.receivedChatBubble]: !sent,
         })}
         disableRipple
-        focusVisibleClassName={classes.focusedChatBubble}
         onClick={toggle}
       >
         <Typography className={classes.text}>{message.body}</Typography>

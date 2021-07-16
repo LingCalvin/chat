@@ -23,7 +23,7 @@ export default function IncomingVideoCallControls({
         text="Decline"
         button={
           <Fab
-            className={clsx(classes.iconButton, classes.rejectIcon)}
+            className={clsx(classes.iconButton, classes.declineIcon)}
             onClick={onDecline}
           >
             <CallEnd color="inherit" />
