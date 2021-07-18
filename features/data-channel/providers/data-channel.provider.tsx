@@ -8,6 +8,7 @@ import {
 } from 'react';
 import SimplePeer from 'simple-peer';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import useAuthId from '../../auth/hooks/use-auth-id';
 import { addContact } from '../../contacts/contacts.slice';
 import {
   setConnectionStatus,
@@ -34,9 +35,7 @@ export interface DataChannelProviderProps {
 export default function DataChannelProvider({
   children,
 }: DataChannelProviderProps) {
-  const id = useAppSelector((state) =>
-    state.auth.status === 'authenticated' ? state.auth.id : null,
-  );
+  const id = useAuthId();
   const contacts = useAppSelector((state) => state.contacts.contacts);
   const conversation = useAppSelector((state) => state.conversation);
   const dispatch = useAppDispatch();
