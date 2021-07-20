@@ -7,6 +7,8 @@
 
 # testing
 /coverage
+public/mockServiceWorker.js
+
 
 # next.js
 /.next/

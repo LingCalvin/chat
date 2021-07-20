@@ -11,7 +11,7 @@ describe('sendNotification', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   test('returns a notification if the application has permission to and the document is hidden', () => {
