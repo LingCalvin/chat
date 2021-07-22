@@ -27,15 +27,35 @@ export default function VideoCallControls({
   className,
 }: VideoCallControlsProps) {
   const classes = useStyles();
+
+  // Prevent event from being passed to the callback
+  const handleMicToggle = () => onMicToggle();
+  const handleVideoToggle = () => onVideoToggle();
+  const handleHangUp = () => onHangUp();
+
   return (
     <div className={clsx(classes.root, className)}>
-      <Fab className={classes.iconButton} size="medium" onClick={onMicToggle}>
+      <Fab
+        aria-label="mic toggle"
+        className={classes.iconButton}
+        size="medium"
+        onClick={handleMicToggle}
+      >
         {micOn ? <Mic /> : <MicOff />}
       </Fab>
-      <Fab className={classes.hangUpIcon} onClick={onHangUp}>
+      <Fab
+        aria-label="hang up"
+        className={classes.hangUpIcon}
+        onClick={handleHangUp}
+      >
         <CallEnd />
       </Fab>
-      <Fab className={classes.iconButton} size="medium" onClick={onVideoToggle}>
+      <Fab
+        aria-label="video toggle"
+        className={classes.iconButton}
+        size="medium"
+        onClick={handleVideoToggle}
+      >
         {videoOn ? <Videocam /> : <VideocamOff />}
       </Fab>
     </div>
