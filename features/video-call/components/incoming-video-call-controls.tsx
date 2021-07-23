@@ -23,6 +23,7 @@ export default function IncomingVideoCallControls({
         text="Decline"
         button={
           <Fab
+            aria-label="decline"
             className={clsx(classes.iconButton, classes.declineIcon)}
             onClick={onDecline}
           >
@@ -34,6 +35,7 @@ export default function IncomingVideoCallControls({
         text="Accept"
         button={
           <Fab
+            aria-label="accept"
             className={clsx(classes.iconButton, classes.acceptIcon)}
             onClick={onAccept}
           >

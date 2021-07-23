@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { ReactNode, useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { darkTheme, theme } from '../../../common/constants/theme';
+import useAuthId from '../../auth/hooks/use-auth-id';
 import { useDataChannel } from '../../data-channel/hooks/use-data-channel';
 import { DataChannelEvent } from '../../data-channel/interfaces/data-channel-events';
 import { MessageType } from '../../data-channel/interfaces/data-channel-messages';
@@ -19,9 +20,7 @@ export interface VideoCallLayerProps {
 }
 
 export default function VideoCallSwitcher({ children }: VideoCallLayerProps) {
-  const id = useAppSelector((state) =>
-    state.auth.status === 'authenticated' ? state.auth.id : null,
-  );
+  const id = useAuthId();
   const status = useAppSelector((state) => state.videoCall.status);
   const messageId = useAppSelector((state) => state.videoCall.messageId);
   const participantId = useAppSelector(

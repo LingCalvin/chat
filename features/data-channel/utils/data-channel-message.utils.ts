@@ -54,7 +54,7 @@ export function readReceiptMessage(messageId: string): ReadReceiptMessage {
 }
 
 export function textMessage(payload: { body: string }): TextMessage {
-  return { ...baseMessage(), type: MessageType.Text, payload };
+  return message(MessageType.Text, payload);
 }
 
 export function videoCallAcceptMessage(

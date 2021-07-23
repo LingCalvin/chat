@@ -8,11 +8,11 @@
 export function sendNotification(
   title: string,
   options: NotificationOptions,
-): void {
+): Notification | undefined {
   if (
     Notification.permission === 'granted' &&
     document.visibilityState === 'hidden'
   ) {
-    new Notification(title, options);
+    return new Notification(title, options);
   }
 }

@@ -30,7 +30,7 @@ export default function ChatBubble({
   const { state: toggleState, toggle } = useToggle();
 
   const getInfoBoxText = () => {
-    if (sent && message.sentDate) {
+    if (sent) {
       return `${new Date(message.sentDate).toLocaleString(
         undefined,
         dateOptions,

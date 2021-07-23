@@ -1,3 +1,7 @@
+if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
+  await import('../mocks');
+}
+
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -12,6 +16,7 @@ import { store } from '../app/store';
 import { theme } from '../common/constants/theme';
 import useRemoveServerSideCSS from '../common/hooks/use-remove-server-side-css';
 import ConversationLogger from '../features/conversation/components/conversation-logger';
+import Notifier from '../features/conversation/components/notifier';
 import DataChannelProvider from '../features/data-channel/providers/data-channel.provider';
 import PersistanceLoader from '../features/perisistance/components/peristance-loader';
 import { SignalingServerConnectionProvider } from '../features/signaling/providers/signaling-server-connection.provider';
@@ -27,6 +32,7 @@ function App({ Component, pageProps }: AppProps) {
       <SignalingServerConnectionProvider>
         <DataChannelProvider>
           <ConversationLogger />
+          <Notifier />
           <Head>
             <title>Chat</title>
           </Head>
