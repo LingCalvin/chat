@@ -19,13 +19,13 @@ describe('ChatBubble', () => {
 
     render(<ChatBubble message={{ ...baseTextMessage, body }} />);
 
-    expect(screen.queryByText(body)).toBeInTheDocument();
+    expect(screen.getByText(body)).toBeInTheDocument();
   });
 
   test('shows the status as unknown when receivedDate and sent are falsy', () => {
     render(<ChatBubble message={baseTextMessage} />);
 
-    expect(screen.queryByText('unknown')).toBeInTheDocument();
+    expect(screen.getByText('unknown')).toBeInTheDocument();
   });
 
   test('shows the status as sent when sentDate is truthy, receivedDate and readDate are falsy, and sent is true', () => {
@@ -37,7 +37,7 @@ describe('ChatBubble', () => {
     );
 
     expect(
-      screen.queryByText((content) => content.endsWith('Sent')),
+      screen.getByText((content) => content.endsWith('Sent')),
     ).toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('ChatBubble', () => {
     );
 
     expect(
-      screen.queryByText((content) => content.endsWith('Delivered')),
+      screen.getByText((content) => content.endsWith('Delivered')),
     ).toBeInTheDocument();
   });
 
@@ -63,7 +63,7 @@ describe('ChatBubble', () => {
     );
 
     expect(
-      screen.queryByText((content) => content.endsWith('Read')),
+      screen.getByText((content) => content.endsWith('Read')),
     ).toBeInTheDocument();
   });
 
@@ -74,6 +74,6 @@ describe('ChatBubble', () => {
       />,
     );
 
-    expect(screen.queryByText('unknown')).toBeNull();
+    expect(screen.queryByText('unknown')).not.toBeInTheDocument();
   });
 });

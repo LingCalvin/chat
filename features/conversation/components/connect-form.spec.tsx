@@ -35,8 +35,15 @@ describe('ConnectForm', () => {
     userEvent.click(submitButton());
 
     expect(field()).toBeValid();
-    waitFor(() => expect(onSubmit).toBeCalledTimes(1));
-    waitFor(() => expect(onSubmit).toBeCalledWith({ id: 'id' }));
+    await Promise.all([
+      waitFor(() => expect(onSubmit).toBeCalledTimes(1)),
+      waitFor(() =>
+        expect(onSubmit).toBeCalledWith(
+          { id: '00000000-0000-0000-0000-000000000000' },
+          expect.anything(),
+        ),
+      ),
+    ]);
   });
 
   test('does not submit when field is empty', () => {
