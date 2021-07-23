@@ -5,7 +5,7 @@ export function useSignalingServerConnection() {
   const context = useContext(SignalingServerConnectionContext);
   if (context === undefined) {
     throw new Error(
-      'useSignalingServerConnection must be used within a SignalingServerProvider',
+      'useSignalingServerConnection must be used within a SignalingServerConnectionProvider',
     );
   }
   return context;
